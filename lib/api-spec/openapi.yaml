@@ -1,15 +1,16 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Subdivision Directory API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: properties
+    description: Property owner operations
 paths:
   /healthz:
     get:
@@ -24,6 +25,64 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /properties:
+    get:
+      operationId: getProperties
+      tags: [properties]
+      summary: Get all properties
+      description: Returns all property owners in the subdivision
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search term to filter by owner name or address
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+          description: Page number (1-based)
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: number
+          description: Results per page
+      responses:
+        "200":
+          description: List of properties
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PropertiesResponse"
+  /properties/sync:
+    post:
+      operationId: syncProperties
+      tags: [properties]
+      summary: Trigger property sync
+      description: Manually trigger a sync of property data from Manatee County GIS
+      responses:
+        "200":
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncResult"
+  /properties/last-sync:
+    get:
+      operationId: getLastSync
+      tags: [properties]
+      summary: Get last sync info
+      description: Returns the timestamp and count of the last data sync
+      responses:
+        "200":
+          description: Last sync info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncInfo"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +92,83 @@ components:
           type: string
       required:
         - status
-
+    Property:
+      type: object
+      properties:
+        id:
+          type: number
+        parcelId:
+          type: string
+        address:
+          type: string
+        ownerName:
+          type: string
+        mailingAddress:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+        landValue:
+          type: string
+        totalValue:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - parcelId
+        - address
+        - ownerName
+        - updatedAt
+    PropertiesResponse:
+      type: object
+      properties:
+        properties:
+          type: array
+          items:
+            $ref: "#/components/schemas/Property"
+        total:
+          type: number
+        page:
+          type: number
+        limit:
+          type: number
+      required:
+        - properties
+        - total
+        - page
+        - limit
+    SyncResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        count:
+          type: number
+        syncedAt:
+          type: string
+      required:
+        - success
+        - message
+        - count
+        - syncedAt
+    SyncInfo:
+      type: object
+      properties:
+        lastSyncAt:
+          type: string
+          nullable: true
+        count:
+          type: number
+        nextSyncAt:
+          type: string
+          nullable: true
+      required:
+        - lastSyncAt
+        - count
+        - nextSyncAt

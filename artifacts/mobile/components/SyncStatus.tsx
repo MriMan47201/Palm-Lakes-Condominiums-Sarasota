@@ -1,0 +1,109 @@
+import { Feather } from "@expo/vector-icons";
+import React from "react";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
+import Colors from "@/constants/colors";
+import type { SyncInfo } from "@/hooks/useApi";
+
+type Props = {
+  syncInfo?: SyncInfo;
+  isSyncing: boolean;
+  onSync: () => void;
+};
+
+function formatTimeAgo(isoDate: string | null): string {
+  if (!isoDate) return "Never";
+  const diff = Date.now() - new Date(isoDate).getTime();
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor(diff / (1000 * 60));
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+export default function SyncStatus({ syncInfo, isSyncing, onSync }: Props) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const theme = Colors[isDark ? "dark" : "light"];
+
+  const lastSyncText = formatTimeAgo(syncInfo?.lastSyncAt ?? null);
+  const count = syncInfo?.count ?? 0;
+
+  return (
+    <View style={[styles.container, { backgroundColor: isDark ? theme.navyMid : theme.backgroundSecondary, borderColor: theme.separator }]}>
+      <View style={styles.info}>
+        <View style={[styles.dot, { backgroundColor: count > 0 ? theme.success : theme.textMuted }]} />
+        <View>
+          <Text style={[styles.countText, { color: theme.text, fontFamily: "Inter_600SemiBold" }]}>
+            {count > 0 ? `${count} properties` : "No data loaded"}
+          </Text>
+          <Text style={[styles.syncText, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+            Updated {lastSyncText}
+          </Text>
+        </View>
+      </View>
+
+      <Pressable
+        onPress={onSync}
+        disabled={isSyncing}
+        style={({ pressed }) => [
+          styles.syncBtn,
+          { backgroundColor: theme.tint + (pressed ? "CC" : "FF"), opacity: isSyncing ? 0.6 : 1 },
+        ]}
+      >
+        {isSyncing ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Feather name="refresh-cw" size={14} color="#fff" />
+        )}
+        <Text style={[styles.syncBtnText, { fontFamily: "Inter_600SemiBold" }]}>
+          {isSyncing ? "Syncing..." : "Sync Now"}
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginHorizontal: 16,
+    marginVertical: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  info: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  countText: {
+    fontSize: 14,
+  },
+  syncText: {
+    fontSize: 11,
+    marginTop: 1,
+  },
+  syncBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+  },
+  syncBtnText: {
+    color: "#fff",
+    fontSize: 13,
+  },
+});
