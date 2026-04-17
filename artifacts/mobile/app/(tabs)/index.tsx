@@ -18,7 +18,7 @@ import SyncStatus from "@/components/SyncStatus";
 import PropertyDetailSheet from "@/components/PropertyDetailSheet";
 import { useProperties, useSyncInfo, useSyncProperties, type Property } from "@/hooks/useApi";
 
-const SUBDIVISION_NAME = "Sarasota Lakes";
+const SUBDIVISION_NAME = "Palm Lakes";
 
 export default function DirectoryScreen() {
   const colorScheme = useColorScheme();
@@ -88,7 +88,7 @@ export default function DirectoryScreen() {
             Resident Directory
           </Text>
           <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.6)", fontFamily: "Inter_400Regular" }]}>
-            Sarasota, FL 34243 · Parcel {syncInfo?.count ? `· ${syncInfo.count} units` : ""}
+            Sarasota, FL 34243{syncInfo?.count ? ` · ${syncInfo.count} units` : ""}
           </Text>
         </View>
       </View>

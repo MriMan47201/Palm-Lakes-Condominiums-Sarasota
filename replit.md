@@ -94,3 +94,19 @@ Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHea
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+
+### `artifacts/mobile` (`@workspace/mobile`)
+
+Expo React Native mobile app — **Palm Lakes Subdivision Directory** for parcel 2029606409, ZIP 34243, Sarasota/Manatee County FL.
+
+- Theme: navy (#0F1B2E) + gold (#C8A96E), Inter font
+- Screens: Directory (searchable list) with PropertyDetailSheet modal
+- Components: PropertyCard, SearchBar, SyncStatus
+- Data: `useApi` hook fetches from the API server at `/api`
+- Auto-syncs once daily; manual "Sync Now" button
+- Real property data from Manatee County GIS ArcGIS REST API:
+  `https://gis.manateepao.gov/arcgis/rest/services/Website/WebLayers/MapServer/0/query`
+  - Query: `PAR_SUBDIV_NAME LIKE 'PALM LAKES A CONDOMINIUM%'`
+  - Fields: PARID, PAR_OWNER_NAME1, PAR_OWNER_NAME2, SITUS_ADDRESS, SITUS_POSTAL_ZIP, PAR_MAIL_*, CAD_JUST_*
+  - Returns 115 real properties (addresses on 77th Dr E, 78th Ave E, 79th Ave E, 33rd St E)
+- DB tables: `properties`, `sync_log` (in `lib/db`)

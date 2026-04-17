@@ -6,8 +6,8 @@ import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
-const SUBDIVISION_PARCEL_ID = "2029606409";
-const MANATEE_GIS_URL = "https://www.mymanatee.org/manateeclerkofcircuitcourt_apps/gis_property_search";
+const SUBDIV_NAME = "PALM LAKES A CONDOMINIUM";
+const GIS_BASE = "https://gis.manateepao.gov/arcgis/rest/services/Website/WebLayers/MapServer/0/query";
 
 async function fetchFromManateeGIS(): Promise<{
   success: boolean;
@@ -25,61 +25,66 @@ async function fetchFromManateeGIS(): Promise<{
   message: string;
 }> {
   try {
-    const searchUrl = `https://www.mymanatee.org/manateeclerkofcircuitcourt_apps/gis_property_search/api/v1/parcels?subdivision=${SUBDIVISION_PARCEL_ID}&format=json`;
+    const params = new URLSearchParams({
+      where: `PAR_SUBDIV_NAME LIKE '${SUBDIV_NAME}%'`,
+      outFields: "PARID,PAR_OWNER_NAME1,PAR_OWNER_NAME2,SITUS_ADDRESS,SITUS_POSTAL_ZIP,PAR_MAIL_ADDR1,PAR_MAIL_CITY,PAR_MAIL_STATE,CAD_JUST_VALUE,CAD_JUST_LNDVAL",
+      f: "json",
+      resultRecordCount: "500",
+    });
 
-    const response = await fetch(searchUrl, {
+    const response = await fetch(`${GIS_BASE}?${params.toString()}`, {
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; SubdivisionDirectory/1.0)",
-        Accept: "application/json, text/html, */*",
+        Accept: "application/json",
       },
       signal: AbortSignal.timeout(30000),
     });
 
-    if (response.ok) {
-      const contentType = response.headers.get("content-type") || "";
-      if (contentType.includes("application/json")) {
-        const data = await response.json();
-        if (data && Array.isArray(data.parcels) && data.parcels.length > 0) {
-          return {
-            success: true,
-            properties: data.parcels.map((p: Record<string, string>) => ({
-              parcelId: p.parcel_id || p.parcelId || "",
-              address: p.address || p.situs_address || "",
-              ownerName: p.owner_name || p.ownerName || "",
-              mailingAddress: p.mailing_address || "",
-              city: p.city || "",
-              state: p.state || "FL",
-              zipCode: p.zip_code || p.zipCode || "",
-              landValue: p.land_value || "",
-              totalValue: p.total_value || "",
-            })),
-            message: "Fetched from live GIS API",
-          };
-        }
-      }
+    if (!response.ok) {
+      return { success: false, properties: [], message: `GIS HTTP ${response.status}` };
     }
 
-    const propertyAppraiserUrl = `https://www.manateepao.gov/property-search/?stype=6&q=${SUBDIVISION_PARCEL_ID}`;
-    const paResponse = await fetch(propertyAppraiserUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; SubdivisionDirectory/1.0)",
-        Accept: "text/html,*/*",
-      },
-      signal: AbortSignal.timeout(30000),
-    });
+    const data = await response.json();
 
-    if (paResponse.ok) {
-      const html = await paResponse.text();
-      const properties = parsePropertyAppraiserHTML(html);
-      if (properties.length > 0) {
-        return { success: true, properties, message: "Fetched from Property Appraiser" };
-      }
+    if (data.error) {
+      return { success: false, properties: [], message: `GIS error: ${data.error.message}` };
     }
+
+    if (!Array.isArray(data.features) || data.features.length === 0) {
+      return { success: false, properties: [], message: "No features returned from GIS" };
+    }
+
+    const properties = data.features
+      .map((f: { attributes: Record<string, string | null> }) => {
+        const a = f.attributes;
+        const owner1 = (a.PAR_OWNER_NAME1 || "").trim();
+        const owner2 = (a.PAR_OWNER_NAME2 || "").trim();
+        const ownerName = owner2 ? `${owner1} / ${owner2}` : owner1;
+        const address = (a.SITUS_ADDRESS || "").trim();
+        const zip = (a.SITUS_POSTAL_ZIP || "34243").trim();
+        const mailAddr = (a.PAR_MAIL_ADDR1 || "").trim();
+        const mailCity = (a.PAR_MAIL_CITY || "").trim();
+        const mailState = (a.PAR_MAIL_STATE || "FL").trim();
+
+        return {
+          parcelId: (a.PARID || "").trim(),
+          address,
+          ownerName: ownerName || "Unknown Owner",
+          mailingAddress: mailAddr,
+          city: mailCity || "Sarasota",
+          state: mailState || "FL",
+          zipCode: zip,
+          landValue: a.CAD_JUST_LNDVAL ? String(a.CAD_JUST_LNDVAL) : "",
+          totalValue: a.CAD_JUST_VALUE ? String(a.CAD_JUST_VALUE) : "",
+        };
+      })
+      .filter((p: { address: string }) => p.address.length > 0)
+      .sort((a: { address: string }, b: { address: string }) => a.address.localeCompare(b.address));
 
     return {
-      success: false,
-      properties: [],
-      message: "Could not retrieve live data from GIS sources. Using cached data.",
+      success: true,
+      properties,
+      message: `Fetched ${properties.length} properties from Manatee County GIS`,
     };
   } catch (err) {
     logger.error({ err }, "Failed to fetch from Manatee GIS");
@@ -89,55 +94,6 @@ async function fetchFromManateeGIS(): Promise<{
       message: `Fetch error: ${err instanceof Error ? err.message : "Unknown error"}`,
     };
   }
-}
-
-function parsePropertyAppraiserHTML(html: string): Array<{
-  parcelId: string;
-  address: string;
-  ownerName: string;
-  mailingAddress: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  landValue: string;
-  totalValue: string;
-}> {
-  const properties: Array<{
-    parcelId: string;
-    address: string;
-    ownerName: string;
-    mailingAddress: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    landValue: string;
-    totalValue: string;
-  }> = [];
-
-  const parcelPattern = /(\d{4}\d{4}\d{4})/g;
-  const addressPattern = /(\d+\s+[A-Z0-9\s]+(?:ST|AVE|DR|RD|LN|CT|WAY|BLVD|CIR|PL|TER|PKWY)[A-Z\s]*)/gi;
-  const ownerPattern = /([A-Z]+(?:\s+[A-Z]+){1,4})\s*(?:TRUST|LLC|INC|CORP|REV)?/g;
-
-  const parcels = html.match(parcelPattern) || [];
-  const addresses = html.match(addressPattern) || [];
-
-  for (let i = 0; i < Math.min(parcels.length, addresses.length, 120); i++) {
-    ownerPattern.lastIndex = 0;
-    const ownerMatch = ownerPattern.exec(html);
-    properties.push({
-      parcelId: parcels[i] || "",
-      address: addresses[i] || "",
-      ownerName: ownerMatch ? ownerMatch[0].trim() : "Unknown Owner",
-      mailingAddress: "",
-      city: "Sarasota",
-      state: "FL",
-      zipCode: "34243",
-      landValue: "",
-      totalValue: "",
-    });
-  }
-
-  return properties;
 }
 
 async function shouldSync(): Promise<boolean> {
@@ -154,10 +110,46 @@ async function shouldSync(): Promise<boolean> {
   return Date.now() - lastSyncTime > oneDayMs;
 }
 
+async function doSync() {
+  const result = await fetchFromManateeGIS();
+
+  if (result.success && result.properties.length > 0) {
+    await db.delete(propertiesTable);
+    await db.insert(propertiesTable).values(
+      result.properties.map((p) => ({
+        parcelId: p.parcelId,
+        address: p.address,
+        ownerName: p.ownerName,
+        mailingAddress: p.mailingAddress,
+        city: p.city,
+        state: p.state,
+        zipCode: p.zipCode,
+        landValue: p.landValue,
+        totalValue: p.totalValue,
+      }))
+    );
+    await db.insert(syncLogTable).values({
+      count: result.properties.length,
+      success: "true",
+      message: result.message,
+    });
+    logger.info({ count: result.properties.length }, "Properties synced successfully");
+  } else {
+    await db.insert(syncLogTable).values({
+      count: 0,
+      success: "false",
+      message: result.message,
+    });
+    logger.warn({ message: result.message }, "Sync returned no properties");
+  }
+
+  return result;
+}
+
 router.get("/properties", async (req, res) => {
   try {
     if (await shouldSync()) {
-      syncPropertiesInBackground();
+      doSync().catch((err) => logger.error({ err }, "Background sync failed"));
     }
 
     const search = (req.query.search as string) || "";
@@ -216,68 +208,11 @@ router.get("/properties", async (req, res) => {
   }
 });
 
-async function syncPropertiesInBackground() {
-  try {
-    const result = await fetchFromManateeGIS();
-
-    if (result.success && result.properties.length > 0) {
-      await db.delete(propertiesTable);
-      await db.insert(propertiesTable).values(
-        result.properties.map((p) => ({
-          parcelId: p.parcelId,
-          address: p.address,
-          ownerName: p.ownerName,
-          mailingAddress: p.mailingAddress,
-          city: p.city,
-          state: p.state,
-          zipCode: p.zipCode,
-          landValue: p.landValue,
-          totalValue: p.totalValue,
-        }))
-      );
-      await db.insert(syncLogTable).values({
-        count: result.properties.length,
-        success: "true",
-        message: result.message,
-      });
-      logger.info({ count: result.properties.length }, "Properties synced successfully");
-    } else {
-      await db.insert(syncLogTable).values({
-        count: 0,
-        success: "false",
-        message: result.message,
-      });
-    }
-  } catch (err) {
-    logger.error({ err }, "Background sync failed");
-  }
-}
-
 router.post("/properties/sync", async (req, res) => {
   try {
-    const result = await fetchFromManateeGIS();
+    const result = await doSync();
 
     if (result.success && result.properties.length > 0) {
-      await db.delete(propertiesTable);
-      await db.insert(propertiesTable).values(
-        result.properties.map((p) => ({
-          parcelId: p.parcelId,
-          address: p.address,
-          ownerName: p.ownerName,
-          mailingAddress: p.mailingAddress,
-          city: p.city,
-          state: p.state,
-          zipCode: p.zipCode,
-          landValue: p.landValue,
-          totalValue: p.totalValue,
-        }))
-      );
-      await db.insert(syncLogTable).values({
-        count: result.properties.length,
-        success: "true",
-        message: result.message,
-      });
-
       res.json({
         success: true,
         message: `Synced ${result.properties.length} properties`,
@@ -285,12 +220,6 @@ router.post("/properties/sync", async (req, res) => {
         syncedAt: new Date().toISOString(),
       });
     } else {
-      await db.insert(syncLogTable).values({
-        count: 0,
-        success: "false",
-        message: result.message,
-      });
-
       const existing = await db.select({ count: count() }).from(propertiesTable);
       res.json({
         success: false,
