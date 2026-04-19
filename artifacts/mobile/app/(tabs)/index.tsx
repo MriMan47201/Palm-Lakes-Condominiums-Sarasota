@@ -19,7 +19,7 @@ import SyncStatus from "@/components/SyncStatus";
 import PropertyDetailSheet from "@/components/PropertyDetailSheet";
 import { useProperties, useSyncInfo, useSyncProperties, type Property } from "@/hooks/useApi";
 
-const SUBDIVISION_NAME = "Palm Lakes";
+const SUBDIVISION_NAME = "Palm Lakes Condominiums";
 
 export default function DirectoryScreen() {
   const colorScheme = useColorScheme();
