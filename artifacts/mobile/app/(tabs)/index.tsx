@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
-import React, { useState, useCallback, useMemo } from "react";
+import { useScrollToTop } from "@react-navigation/native";
+import React, { useState, useCallback, useMemo, useRef } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -25,6 +26,9 @@ export default function DirectoryScreen() {
   const isDark = colorScheme === "dark";
   const theme = Colors[isDark ? "dark" : "light"];
   const insets = useSafeAreaInsets();
+
+  const listRef = useRef<FlatList>(null);
+  useScrollToTop(listRef);
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -170,6 +174,7 @@ export default function DirectoryScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <FlatList
+        ref={listRef}
         data={properties}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
