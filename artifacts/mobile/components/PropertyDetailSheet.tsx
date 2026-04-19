@@ -144,7 +144,7 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
             ) : null}
 
             <Text style={[styles.footer, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
-              Data sourced from Public Manatee County GIS
+              Public data sourced from Manatee County GIS
             </Text>
           </ScrollView>
         </View>
