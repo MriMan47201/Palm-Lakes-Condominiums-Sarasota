@@ -4,6 +4,7 @@ import React, { useState, useCallback, useMemo, useRef } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   StyleSheet,
   Text,
   View,
@@ -21,6 +22,35 @@ import { useProperties, useSyncInfo, useSyncProperties, type Property } from "@/
 
 const SUBDIVISION_NAME = "Palm Lakes Condominiums";
 
+type SortMode = "number" | "street";
+
+const STREET_ORDER = [
+  "31ST ST E",
+  "32ND ST E",
+  "33RD ST E",
+  "77TH DR E",
+  "78TH AVE E",
+  "79TH AVE E",
+];
+
+function getStreetName(address: string): string {
+  return address.replace(/^\d+\s+/, "").toUpperCase().trim();
+}
+
+function sortByStreet(a: Property, b: Property): number {
+  const streetA = getStreetName(a.address);
+  const streetB = getStreetName(b.address);
+  const idxA = STREET_ORDER.indexOf(streetA);
+  const idxB = STREET_ORDER.indexOf(streetB);
+  const orderA = idxA === -1 ? 999 : idxA;
+  const orderB = idxB === -1 ? 999 : idxB;
+  if (orderA !== orderB) return orderA - orderB;
+  // Within same street: sort by house number numerically
+  const numA = parseInt(a.address, 10) || 0;
+  const numB = parseInt(b.address, 10) || 0;
+  return numA - numB;
+}
+
 export default function DirectoryScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
@@ -34,6 +64,7 @@ export default function DirectoryScreen() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [sortMode, setSortMode] = useState<SortMode>("number");
 
   const searchTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -54,6 +85,13 @@ export default function DirectoryScreen() {
 
   const properties = data?.properties ?? [];
   const total = data?.total ?? 0;
+
+  const sortedProperties = useMemo(() => {
+    if (sortMode === "street") {
+      return [...properties].sort(sortByStreet);
+    }
+    return properties;
+  }, [properties, sortMode]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -80,7 +118,7 @@ export default function DirectoryScreen() {
 
   const ListHeader = useMemo(() => (
     <View>
-      <View style={[styles.headerBanner, { backgroundColor: isDark ? theme.navy : theme.navy }]}>
+      <View style={[styles.headerBanner, { backgroundColor: theme.navy }]}>
         <View style={styles.headerContent}>
           <View style={styles.headerTop}>
             <Feather name="map-pin" size={18} color="#FFD94A" />
@@ -116,10 +154,42 @@ export default function DirectoryScreen() {
           <Text style={[styles.resultsText, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
             {debouncedSearch ? `${total} result${total !== 1 ? "s" : ""} for "${debouncedSearch}"` : `${total} properties`}
           </Text>
+          <View style={[styles.sortToggle, { backgroundColor: isDark ? theme.backgroundTertiary : theme.backgroundTertiary, borderColor: theme.separator }]}>
+            <Pressable
+              onPress={() => setSortMode("number")}
+              style={[
+                styles.sortPill,
+                sortMode === "number" && { backgroundColor: theme.tint },
+              ]}
+            >
+              <Feather name="hash" size={11} color={sortMode === "number" ? "#fff" : theme.textMuted} />
+              <Text style={[
+                styles.sortPillText,
+                { color: sortMode === "number" ? "#fff" : theme.textMuted, fontFamily: "Inter_500Medium" },
+              ]}>
+                Number
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setSortMode("street")}
+              style={[
+                styles.sortPill,
+                sortMode === "street" && { backgroundColor: theme.tint },
+              ]}
+            >
+              <Feather name="align-left" size={11} color={sortMode === "street" ? "#fff" : theme.textMuted} />
+              <Text style={[
+                styles.sortPillText,
+                { color: sortMode === "street" ? "#fff" : theme.textMuted, fontFamily: "Inter_500Medium" },
+              ]}>
+                Street
+              </Text>
+            </Pressable>
+          </View>
         </View>
       )}
     </View>
-  ), [isDark, theme, syncInfo, syncMutation.isPending, search, debouncedSearch, total, isLoading, handleSync, handleSearchChange]);
+  ), [isDark, theme, syncInfo, syncMutation.isPending, search, debouncedSearch, total, isLoading, handleSync, handleSearchChange, sortMode]);
 
   const renderItem = useCallback(
     ({ item }: { item: Property }) => (
@@ -175,7 +245,7 @@ export default function DirectoryScreen() {
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <FlatList
         ref={listRef}
-        data={properties}
+        data={sortedProperties}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
         ListHeaderComponent={ListHeader}
@@ -241,11 +311,33 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   resultsRow: {
-    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
     paddingVertical: 8,
   },
   resultsText: {
     fontSize: 13,
+  },
+  sortToggle: {
+    flexDirection: "row",
+    borderRadius: 8,
+    borderWidth: 1,
+    overflow: "hidden",
+    gap: 2,
+    padding: 2,
+  },
+  sortPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  sortPillText: {
+    fontSize: 12,
   },
   centered: {
     alignItems: "center",
