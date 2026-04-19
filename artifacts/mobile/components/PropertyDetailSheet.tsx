@@ -114,14 +114,14 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
             {(property.landValue || property.totalValue) ? (
               <>
                 <Text style={[styles.sectionTitle, { color: theme.textMuted, fontFamily: "Inter_600SemiBold", marginTop: 20 }]}>
-                  ASSESSED VALUES
+                  JUST VALUES (MARKET)
                 </Text>
                 <View style={styles.valuesRow}>
                   {property.totalValue ? (
                     <View style={[styles.valueCard, { backgroundColor: theme.tint + "18", borderColor: theme.tint + "44" }]}>
                       <Feather name="home" size={18} color={theme.tint} />
                       <Text style={[styles.valueCardLabel, { color: theme.textSecondary, fontFamily: "Inter_400Regular" }]}>
-                        Total Value
+                        Just Value
                       </Text>
                       <Text style={[styles.valueCardAmount, { color: theme.text, fontFamily: "Inter_700Bold" }]}>
                         ${Number(property.totalValue.replace(/[^0-9]/g, "")).toLocaleString()}

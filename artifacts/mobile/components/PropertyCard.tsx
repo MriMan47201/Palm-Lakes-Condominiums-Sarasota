@@ -96,7 +96,7 @@ export default function PropertyCard({ property, onPress, searchQuery = "" }: Pr
           <View style={styles.valueRow}>
             {property.totalValue ? (
               <View style={styles.valueChip}>
-                <Text style={[styles.valueLabel, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>Total</Text>
+                <Text style={[styles.valueLabel, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>Just Value</Text>
                 <Text style={[styles.valueAmount, { color: theme.textSecondary, fontFamily: "Inter_600SemiBold" }]}>
                   ${Number(property.totalValue.replace(/[^0-9]/g, "")).toLocaleString()}
                 </Text>
