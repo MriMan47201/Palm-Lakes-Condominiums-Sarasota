@@ -42,7 +42,7 @@ export default function DirectoryScreen() {
   const { data, isLoading, refetch } = useProperties({
     search: debouncedSearch,
     page: 1,
-    limit: 200,
+    limit: 500,
   });
 
   const { data: syncInfo, refetch: refetchSync } = useSyncInfo();
