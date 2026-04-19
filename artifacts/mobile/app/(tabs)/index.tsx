@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
-import { useScrollTopListener } from "@/hooks/useScrollTopEvent";
-import React, { useState, useCallback, useMemo, useRef } from "react";
+import { useScrollToTop } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -62,9 +63,19 @@ export default function DirectoryScreen() {
   const insets = useSafeAreaInsets();
 
   const listRef = useRef<FlatList>(null);
-  useScrollTopListener(() => {
-    listRef.current?.scrollToOffset({ animated: true, offset: 0 });
-  });
+  // Standard hook — works for classic Tabs navigator
+  useScrollToTop(listRef);
+  // Direct parent-navigator listener — covers NativeTabs on iOS
+  const navigation = useNavigation();
+  useEffect(() => {
+    const parent = navigation.getParent();
+    const unsubscribe = parent?.addListener("tabPress" as never, () => {
+      if (navigation.isFocused()) {
+        listRef.current?.scrollToOffset({ animated: true, offset: 0 });
+      }
+    });
+    return () => unsubscribe?.();
+  }, [navigation]);
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -272,6 +283,7 @@ export default function DirectoryScreen() {
             tintColor={theme.tint}
           />
         }
+        scrollsToTop
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
       />
