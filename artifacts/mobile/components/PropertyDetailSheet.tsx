@@ -53,7 +53,7 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
 
   const mailingIsDifferent =
     property.mailingAddress &&
-    property.mailingAddress.trim() !== property.address.trim();
+    !property.mailingAddress.trim().toUpperCase().startsWith(property.address.trim().toUpperCase());
 
   return (
     <Modal

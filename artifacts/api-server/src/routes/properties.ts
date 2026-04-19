@@ -27,7 +27,7 @@ async function fetchFromManateeGIS(): Promise<{
   try {
     const params = new URLSearchParams({
       where: `PAR_SUBDIV_NAME LIKE '${SUBDIV_NAME}%'`,
-      outFields: "PARID,PAR_OWNER_NAME1,PAR_OWNER_NAME2,SITUS_ADDRESS,SITUS_POSTAL_ZIP,PAR_MAIL_ADDR1,PAR_MAIL_CITY,PAR_MAIL_STATE,CAD_JUST_VALUE,CAD_JUST_LNDVAL",
+      outFields: "PARID,PAR_OWNER_NAME1,PAR_OWNER_NAME2,SITUS_ADDRESS,SITUS_POSTAL_ZIP,PAR_MAIL_ADDR1,PAR_MAIL_CITY,PAR_MAIL_STATE,PAR_MAIL_POSTALCD,CAD_JUST_VALUE,CAD_JUST_LNDVAL",
       f: "json",
       resultRecordCount: "500",
     });
@@ -65,14 +65,21 @@ async function fetchFromManateeGIS(): Promise<{
         const mailAddr = (a.PAR_MAIL_ADDR1 || "").trim();
         const mailCity = (a.PAR_MAIL_CITY || "").trim();
         const mailState = (a.PAR_MAIL_STATE || "FL").trim();
+        const mailZip = (a.PAR_MAIL_POSTALCD || "").trim();
+
+        // Build full mailing address for display in detail sheet
+        const mailingCityLine = [mailCity, mailState, mailZip].filter(Boolean).join(", ");
+        const fullMailingAddress = mailAddr
+          ? (mailingCityLine ? `${mailAddr}, ${mailingCityLine}` : mailAddr)
+          : "";
 
         return {
           parcelId: (a.PARID || "").trim(),
           address,
           ownerName: ownerName || "Unknown Owner",
-          mailingAddress: mailAddr,
-          city: mailCity || "Sarasota",
-          state: mailState || "FL",
+          mailingAddress: fullMailingAddress,
+          city: "Sarasota",
+          state: "FL",
           zipCode: zip,
           landValue: a.CAD_JUST_LNDVAL ? String(a.CAD_JUST_LNDVAL) : "",
           totalValue: a.CAD_JUST_VALUE ? String(a.CAD_JUST_VALUE) : "",
