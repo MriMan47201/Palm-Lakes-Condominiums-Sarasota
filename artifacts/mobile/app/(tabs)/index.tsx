@@ -83,8 +83,8 @@ export default function DirectoryScreen() {
       <View style={[styles.headerBanner, { backgroundColor: isDark ? theme.navy : theme.navy }]}>
         <View style={styles.headerContent}>
           <View style={styles.headerTop}>
-            <Feather name="map-pin" size={18} color={theme.tint} />
-            <Text style={[styles.subdivisionLabel, { color: theme.tint, fontFamily: "Inter_500Medium" }]}>
+            <Feather name="map-pin" size={18} color="#FFD94A" />
+            <Text style={[styles.subdivisionLabel, { color: "#FFD94A", fontFamily: "Inter_500Medium" }]}>
               {SUBDIVISION_NAME}
             </Text>
           </View>
