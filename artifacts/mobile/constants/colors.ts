@@ -1,50 +1,50 @@
-const accent = "#C8A96E";
-const accentLight = "#E8C98E";
-const navy = "#0F1B2E";
-const navyMid = "#1A2D48";
-const navyLight = "#243D5E";
+const accent = "#0891B2";       // Florida Gulf turquoise — readable on all backgrounds
+const accentLight = "#22D3EE";  // Bright sky cyan
+const navy = "#073B4C";          // Deep Florida ocean (header)
+const navyMid = "#0F5E75";       // Gulf midtone
+const navyLight = "#187A97";     // Clear water blue
 
 export default {
   light: {
-    text: "#0F1B2E",
-    textSecondary: "#5A6A7E",
-    textMuted: "#8A9BB0",
-    background: "#F5F7FA",
+    text: "#0A2733",
+    textSecondary: "#2C6A80",
+    textMuted: "#6E9BAD",
+    background: "#F0FAFF",
     backgroundSecondary: "#FFFFFF",
-    backgroundTertiary: "#EDF0F5",
+    backgroundTertiary: "#DDEFFA",
     tint: accent,
     tintLight: accentLight,
     navy,
     navyMid,
     navyLight,
-    separator: "#E2E8F0",
+    separator: "#B8D9E8",
     card: "#FFFFFF",
-    tabIconDefault: "#8A9BB0",
+    tabIconDefault: "#89B5C8",
     tabIconSelected: accent,
-    success: "#27AE60",
-    warning: "#F39C12",
-    error: "#E74C3C",
-    shadow: "rgba(15, 27, 46, 0.08)",
+    success: "#10B981",
+    warning: "#F59E0B",
+    error: "#EF4444",
+    shadow: "rgba(7, 59, 76, 0.08)",
   },
   dark: {
-    text: "#F0F4FF",
-    textSecondary: "#8AA0BF",
-    textMuted: "#5A6A7E",
-    background: "#080E18",
-    backgroundSecondary: "#0F1B2E",
-    backgroundTertiary: "#1A2D48",
+    text: "#E0F4FF",
+    textSecondary: "#7ABDD4",
+    textMuted: "#4A7A8E",
+    background: "#041824",
+    backgroundSecondary: "#073B4C",
+    backgroundTertiary: "#0F5E75",
     tint: accent,
     tintLight: accentLight,
     navy,
     navyMid,
     navyLight,
-    separator: "#1E3050",
-    card: "#0F1B2E",
-    tabIconDefault: "#5A6A7E",
+    separator: "#0F5E75",
+    card: "#073B4C",
+    tabIconDefault: "#4A7A8E",
     tabIconSelected: accent,
-    success: "#2ECC71",
-    warning: "#F39C12",
-    error: "#E74C3C",
+    success: "#34D399",
+    warning: "#FBBF24",
+    error: "#F87171",
     shadow: "rgba(0, 0, 0, 0.4)",
   },
 };
