@@ -8,11 +8,12 @@ import React from "react";
 import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import { emitScrollTop } from "@/hooks/useScrollTopEvent";
 
 function NativeTabLayout() {
   return (
     <NativeTabs>
-      <NativeTabs.Trigger name="index">
+      <NativeTabs.Trigger name="index" onPress={emitScrollTop}>
         <Icon sf={{ default: "house", selected: "house.fill" }} />
         <Label>Directory</Label>
       </NativeTabs.Trigger>
@@ -71,6 +72,9 @@ function ClassicTabLayout() {
             ) : (
               <Feather name="home" size={22} color={color} />
             ),
+        }}
+        listeners={{
+          tabPress: () => emitScrollTop(),
         }}
       />
     </Tabs>

@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import { useScrollToTop } from "@react-navigation/native";
+import { useScrollTopListener } from "@/hooks/useScrollTopEvent";
 import React, { useState, useCallback, useMemo, useRef } from "react";
 import {
   ActivityIndicator,
@@ -62,7 +62,9 @@ export default function DirectoryScreen() {
   const insets = useSafeAreaInsets();
 
   const listRef = useRef<FlatList>(null);
-  useScrollToTop(listRef);
+  useScrollTopListener(() => {
+    listRef.current?.scrollToOffset({ animated: true, offset: 0 });
+  });
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
