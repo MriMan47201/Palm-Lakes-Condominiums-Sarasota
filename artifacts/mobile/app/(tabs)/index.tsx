@@ -4,6 +4,7 @@ import React, { useState, useCallback, useMemo, useRef } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  ImageBackground,
   Pressable,
   StyleSheet,
   Text,
@@ -12,6 +13,7 @@ import {
   RefreshControl,
   Alert,
 } from "react-native";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import PropertyCard from "@/components/PropertyCard";
@@ -19,6 +21,8 @@ import SearchBar from "@/components/SearchBar";
 import SyncStatus from "@/components/SyncStatus";
 import PropertyDetailSheet from "@/components/PropertyDetailSheet";
 import { useProperties, useSyncInfo, useSyncProperties, type Property } from "@/hooks/useApi";
+
+const ENTRANCE_IMAGE = require("../../assets/images/main-entrance.jpg");
 
 const SUBDIVISION_NAME = "Palm Lakes Condominiums";
 
@@ -118,22 +122,28 @@ export default function DirectoryScreen() {
 
   const ListHeader = useMemo(() => (
     <View>
-      <View style={[styles.headerBanner, { backgroundColor: theme.navy }]}>
-        <View style={styles.headerContent}>
-          <View style={styles.headerTop}>
-            <Feather name="map-pin" size={18} color="#FFD94A" />
-            <Text style={[styles.subdivisionLabel, { color: "#FFD94A", fontFamily: "Inter_500Medium" }]}>
-              {SUBDIVISION_NAME}
+      <ImageBackground
+        source={ENTRANCE_IMAGE}
+        style={styles.headerBanner}
+        resizeMode="cover"
+      >
+        <View style={styles.headerOverlay}>
+          <View style={styles.headerContent}>
+            <View style={styles.headerTop}>
+              <Feather name="map-pin" size={18} color="#FFD94A" />
+              <Text style={[styles.subdivisionLabel, { color: "#FFD94A", fontFamily: "Inter_500Medium" }]}>
+                {SUBDIVISION_NAME}
+              </Text>
+            </View>
+            <Text style={[styles.headerTitle, { color: "#FFFFFF", fontFamily: "Inter_700Bold" }]}>
+              Resident Directory
+            </Text>
+            <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.75)", fontFamily: "Inter_400Regular" }]}>
+              Sarasota, FL 34243{syncInfo?.count ? ` · ${syncInfo.count} units` : ""}
             </Text>
           </View>
-          <Text style={[styles.headerTitle, { color: "#FFFFFF", fontFamily: "Inter_700Bold" }]}>
-            Resident Directory
-          </Text>
-          <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.6)", fontFamily: "Inter_400Regular" }]}>
-            Sarasota, FL 34243{syncInfo?.count ? ` · ${syncInfo.count} units` : ""}
-          </Text>
         </View>
-      </View>
+      </ImageBackground>
 
       <SyncStatus
         syncInfo={syncInfo}
@@ -281,9 +291,15 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   headerBanner: {
+    height: 200,
+  },
+  headerOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(7,59,76,0.72)",
     paddingTop: 24,
     paddingBottom: 28,
     paddingHorizontal: 20,
+    justifyContent: "flex-end",
   },
   headerContent: {
     gap: 4,

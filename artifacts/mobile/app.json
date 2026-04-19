@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Subdivision Directory",
-    "slug": "mobile",
+    "name": "PLC Directory",
+    "slug": "plcdirectory",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
+    "scheme": "plcdirectory",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -14,9 +14,12 @@
       "backgroundColor": "#0F1B2E"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.plcdirectory.app"
     },
-    "android": {},
+    "android": {
+      "package": "com.plcdirectory.app"
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
