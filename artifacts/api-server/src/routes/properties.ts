@@ -117,6 +117,21 @@ async function shouldSync(): Promise<boolean> {
   return Date.now() - lastSyncTime > oneDayMs;
 }
 
+// Custom entries that are not in the GIS data and must survive every sync
+const PINNED_ENTRIES = [
+  {
+    parcelId: "2029601009",
+    address: "7740 31ST ST E",
+    ownerName: "PALM LAKES (Clubhouse)",
+    mailingAddress: "PO BOX 21058, SARASOTA, FL, 34276",
+    city: "Sarasota",
+    state: "FL",
+    zipCode: "34243",
+    landValue: null as string | null,
+    totalValue: null as string | null,
+  },
+];
+
 async function doSync() {
   const result = await fetchFromManateeGIS();
 
@@ -135,6 +150,12 @@ async function doSync() {
         totalValue: p.totalValue,
       }))
     );
+    // Re-insert any pinned custom entries not covered by GIS
+    const gisAddresses = new Set(result.properties.map((p) => p.address));
+    const missing = PINNED_ENTRIES.filter((e) => !gisAddresses.has(e.address));
+    if (missing.length > 0) {
+      await db.insert(propertiesTable).values(missing);
+    }
     await db.insert(syncLogTable).values({
       count: result.properties.length,
       success: "true",
