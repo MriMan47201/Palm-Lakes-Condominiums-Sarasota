@@ -4,6 +4,7 @@ import { useNavigation } from "expo-router";
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import {
   ActivityIndicator,
+  Animated,
   FlatList,
   ImageBackground,
   Pressable,
@@ -63,6 +64,28 @@ export default function DirectoryScreen() {
   const insets = useSafeAreaInsets();
 
   const listRef = useRef<FlatList>(null);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [showTopBtn, setShowTopBtn] = useState(false);
+
+  const handleScroll = useCallback((e: { nativeEvent: { contentOffset: { y: number } } }) => {
+    const y = e.nativeEvent.contentOffset.y;
+    const shouldShow = y > 300;
+    setShowTopBtn((prev) => {
+      if (prev !== shouldShow) {
+        Animated.timing(fadeAnim, {
+          toValue: shouldShow ? 1 : 0,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      }
+      return shouldShow;
+    });
+  }, [fadeAnim]);
+
+  const scrollToTop = useCallback(() => {
+    listRef.current?.scrollToOffset({ animated: true, offset: 0 });
+  }, []);
+
   // Standard hook — works for classic Tabs navigator
   useScrollToTop(listRef);
   // Direct parent-navigator listener — covers NativeTabs on iOS
@@ -284,9 +307,31 @@ export default function DirectoryScreen() {
           />
         }
         scrollsToTop
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
       />
+
+      <Animated.View
+        style={[
+          styles.topBtn,
+          {
+            bottom: insets.bottom + 80,
+            opacity: fadeAnim,
+            transform: [{ scale: fadeAnim.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1] }) }],
+          },
+        ]}
+        pointerEvents={showTopBtn ? "auto" : "none"}
+      >
+        <Pressable
+          onPress={scrollToTop}
+          style={[styles.topBtnInner, { backgroundColor: theme.tint }]}
+        >
+          <Feather name="arrow-up" size={18} color="#fff" />
+          <Text style={[styles.topBtnText, { fontFamily: "Inter_600SemiBold" }]}>Top</Text>
+        </Pressable>
+      </Animated.View>
 
       <PropertyDetailSheet
         property={selectedProperty}
@@ -382,6 +427,27 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     textAlign: "center",
+  },
+  topBtn: {
+    position: "absolute",
+    right: 20,
+  },
+  topBtnInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  topBtnText: {
+    color: "#fff",
+    fontSize: 14,
   },
   emptySubtitle: {
     fontSize: 14,
