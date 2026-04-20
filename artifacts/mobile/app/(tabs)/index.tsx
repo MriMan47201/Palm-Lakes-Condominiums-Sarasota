@@ -81,7 +81,7 @@ export default function DirectoryScreen() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [sortMode, setSortMode] = useState<SortMode>("number");
+  const [sortMode, setSortMode] = useState<SortMode>("street");
 
   const searchTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -179,21 +179,6 @@ export default function DirectoryScreen() {
           </Text>
           <View style={[styles.sortToggle, { backgroundColor: isDark ? theme.backgroundTertiary : theme.backgroundTertiary, borderColor: theme.separator }]}>
             <Pressable
-              onPress={() => setSortMode("number")}
-              style={[
-                styles.sortPill,
-                sortMode === "number" && { backgroundColor: theme.tint },
-              ]}
-            >
-              <Feather name="hash" size={11} color={sortMode === "number" ? "#fff" : theme.textMuted} />
-              <Text style={[
-                styles.sortPillText,
-                { color: sortMode === "number" ? "#fff" : theme.textMuted, fontFamily: "Inter_500Medium" },
-              ]}>
-                Number
-              </Text>
-            </Pressable>
-            <Pressable
               onPress={() => setSortMode("street")}
               style={[
                 styles.sortPill,
@@ -206,6 +191,21 @@ export default function DirectoryScreen() {
                 { color: sortMode === "street" ? "#fff" : theme.textMuted, fontFamily: "Inter_500Medium" },
               ]}>
                 Street
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setSortMode("number")}
+              style={[
+                styles.sortPill,
+                sortMode === "number" && { backgroundColor: theme.tint },
+              ]}
+            >
+              <Feather name="hash" size={11} color={sortMode === "number" ? "#fff" : theme.textMuted} />
+              <Text style={[
+                styles.sortPillText,
+                { color: sortMode === "number" ? "#fff" : theme.textMuted, fontFamily: "Inter_500Medium" },
+              ]}>
+                Number
               </Text>
             </Pressable>
           </View>
