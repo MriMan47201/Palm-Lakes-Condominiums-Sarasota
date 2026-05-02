@@ -13,6 +13,7 @@ export const propertiesTable = pgTable("properties", {
   zipCode: text("zip_code"),
   landValue: text("land_value"),
   totalValue: text("total_value"),
+  lotNumber: text("lot_number"),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 

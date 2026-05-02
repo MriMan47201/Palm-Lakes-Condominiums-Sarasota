@@ -71,6 +71,8 @@ export default function DirectoryScreen() {
     const parent = navigation.getParent();
     const unsubscribe = parent?.addListener("tabPress" as never, () => {
       if (navigation.isFocused()) {
+        setSearch("");
+        setDebouncedSearch("");
         listRef.current?.scrollToOffset({ animated: true, offset: 0 });
       }
     });

@@ -32,6 +32,7 @@ export type Property = {
   zipCode?: string | null;
   landValue?: string | null;
   totalValue?: string | null;
+  lotNumber?: string | null;
   updatedAt: string;
 };
 

@@ -80,6 +80,11 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
               <Text style={[styles.headerAddress, { color: theme.text, fontFamily: "Inter_700Bold" }]}>
                 {property.address}
               </Text>
+              {property.lotNumber ? (
+                <Text style={[styles.headerUnit, { color: theme.textSecondary, fontFamily: "Inter_400Regular" }]}>
+                  Unit No. {property.lotNumber}
+                </Text>
+              ) : null}
               <Text style={[styles.headerCity, { color: theme.textSecondary, fontFamily: "Inter_400Regular" }]}>
                 {[property.city, property.state, property.zipCode].filter(Boolean).join(", ") || "Sarasota, FL 34243"}
               </Text>
@@ -191,9 +196,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     lineHeight: 26,
   },
+  headerUnit: {
+    fontSize: 14,
+    marginTop: 2,
+  },
   headerCity: {
     fontSize: 14,
-    marginTop: 3,
+    marginTop: 2,
   },
   closeBtn: {
     width: 34,

@@ -21,13 +21,14 @@ async function fetchFromManateeGIS(): Promise<{
     zipCode: string;
     landValue: string;
     totalValue: string;
+    lotNumber: string;
   }>;
   message: string;
 }> {
   try {
     const params = new URLSearchParams({
       where: `PAR_SUBDIV_NAME LIKE '${SUBDIV_NAME}%'`,
-      outFields: "PARID,PAR_OWNER_NAME1,PAR_OWNER_NAME2,SITUS_ADDRESS,SITUS_POSTAL_ZIP,PAR_MAIL_ADDR1,PAR_MAIL_CITY,PAR_MAIL_STATE,PAR_MAIL_POSTALCD,CAD_JUST_VALUE,CAD_JUST_LNDVAL",
+      outFields: "PARID,PAR_OWNER_NAME1,PAR_OWNER_NAME2,SITUS_ADDRESS,SITUS_POSTAL_ZIP,PAR_MAIL_ADDR1,PAR_MAIL_CITY,PAR_MAIL_STATE,PAR_MAIL_POSTALCD,CAD_JUST_VALUE,CAD_JUST_LNDVAL,PAR_SUBDIV_LOT",
       f: "json",
       resultRecordCount: "500",
     });
@@ -83,6 +84,7 @@ async function fetchFromManateeGIS(): Promise<{
           zipCode: zip,
           landValue: a.CAD_JUST_LNDVAL ? String(a.CAD_JUST_LNDVAL) : "",
           totalValue: a.CAD_JUST_VALUE ? String(a.CAD_JUST_VALUE) : "",
+          lotNumber: a.PAR_SUBDIV_LOT ? String(a.PAR_SUBDIV_LOT) : "",
         };
       })
       .filter((p: { address: string }) => p.address.length > 0)
@@ -148,6 +150,7 @@ async function doSync() {
         zipCode: p.zipCode,
         landValue: p.landValue,
         totalValue: p.totalValue,
+        lotNumber: p.lotNumber,
       }))
     );
     // Re-insert any pinned custom entries not covered by GIS
@@ -224,6 +227,7 @@ router.get("/properties", async (req, res) => {
         zipCode: p.zipCode,
         landValue: p.landValue,
         totalValue: p.totalValue,
+        lotNumber: p.lotNumber,
         updatedAt: p.updatedAt?.toISOString(),
       })),
       total,
