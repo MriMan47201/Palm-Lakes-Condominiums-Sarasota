@@ -73,11 +73,11 @@ export default function DirectoryScreen() {
   useEffect(() => {
     const parent = navigation.getParent();
     const unsubscribe = parent?.addListener("tabPress" as never, () => {
-      if (!navigation.isFocused()) return;
-      // Clear search immediately
+      // Check state directly — isFocused() is unreliable right after a Modal closes
+      const state = parent?.getState() as { routes: { name: string }[]; index: number } | undefined;
+      if (state?.routes[state.index]?.name !== "index") return;
       setSearch("");
       setDebouncedSearch("");
-      // Wait two animation frames so React re-renders the full list before scrolling
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           listRef.current?.scrollToOffset({ animated: true, offset: 0 });
