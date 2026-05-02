@@ -83,9 +83,9 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
               <Text style={[styles.headerAddress, { color: theme.text, fontFamily: "Inter_700Bold" }]}>
                 {property.address}
               </Text>
-              {property.lotNumber ? (
+              {property.lotNumber && /^\d+$/.test(property.lotNumber.trim()) ? (
                 <Text style={[styles.headerUnit, { color: theme.textSecondary, fontFamily: "Inter_400Regular" }]}>
-                  Unit No. {property.lotNumber}
+                  Unit No. {property.lotNumber.trim()}
                 </Text>
               ) : null}
               <Text style={[styles.headerCity, { color: theme.textSecondary, fontFamily: "Inter_400Regular" }]}>
