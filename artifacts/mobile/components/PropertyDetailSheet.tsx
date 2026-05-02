@@ -70,6 +70,8 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
             {
               backgroundColor: theme.backgroundSecondary,
               paddingBottom: insets.bottom + 16,
+              paddingLeft: insets.left,
+              paddingRight: insets.right,
             },
           ]}
         >
