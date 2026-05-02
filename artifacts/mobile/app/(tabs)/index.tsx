@@ -160,7 +160,7 @@ export default function DirectoryScreen() {
               Resident Directory
             </Text>
             <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.80)", fontFamily: "Inter_400Regular" }]}>
-              Sarasota, FL 34243{syncInfo?.count ? ` · ${syncInfo.count} units` : ""}
+              Sarasota, FL 34243{syncInfo?.count ? ` · ${syncInfo.count} units` : ""} · v1.0
             </Text>
           </View>
         </LinearGradient>
