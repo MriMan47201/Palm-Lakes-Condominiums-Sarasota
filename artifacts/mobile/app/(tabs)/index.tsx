@@ -64,38 +64,28 @@ export default function DirectoryScreen() {
   const insets = useSafeAreaInsets();
 
   const listRef = useRef<FlatList>(null);
-  const pendingScrollToTop = useRef(false);
-  // Standard hook — works for classic Tabs navigator
   useScrollToTop(listRef);
-  // Direct parent-navigator listener — covers NativeTabs on iOS
   const navigation = useNavigation();
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // After search clears and full list re-renders, do the scroll
-  useEffect(() => {
-    if (pendingScrollToTop.current && !search) {
-      pendingScrollToTop.current = false;
-      listRef.current?.scrollToOffset({ animated: true, offset: 0 });
-    }
-  }, [search]);
-
   useEffect(() => {
     const parent = navigation.getParent();
     const unsubscribe = parent?.addListener("tabPress" as never, () => {
-      if (navigation.isFocused()) {
-        if (search) {
-          pendingScrollToTop.current = true;
-          setSearch("");
-          setDebouncedSearch("");
-        } else {
+      if (!navigation.isFocused()) return;
+      // Clear search immediately
+      setSearch("");
+      setDebouncedSearch("");
+      // Wait two animation frames so React re-renders the full list before scrolling
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
           listRef.current?.scrollToOffset({ animated: true, offset: 0 });
-        }
-      }
+        });
+      });
     });
     return () => unsubscribe?.();
-  }, [navigation, search]);
+  }, [navigation]);
 
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
