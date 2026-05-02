@@ -159,9 +159,14 @@ export default function DirectoryScreen() {
             <Text style={[styles.headerTitle, { color: "#FFFFFF", fontFamily: "Inter_700Bold" }]}>
               Resident Directory
             </Text>
-            <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.80)", fontFamily: "Inter_400Regular" }]}>
-              Sarasota, FL 34243{syncInfo?.count ? ` · ${syncInfo.count} units` : ""} · v1.0
-            </Text>
+            <View style={styles.headerSubtitleRow}>
+              <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.80)", fontFamily: "Inter_400Regular" }]}>
+                Sarasota, FL 34243{syncInfo?.count ? ` · ${syncInfo.count} units` : ""}
+              </Text>
+              <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.80)", fontFamily: "Inter_400Regular" }]}>
+                v1.0
+              </Text>
+            </View>
           </View>
         </LinearGradient>
       </ImageBackground>
@@ -339,9 +344,14 @@ const styles = StyleSheet.create({
     fontSize: 28,
     lineHeight: 34,
   },
+  headerSubtitleRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 4,
+  },
   headerSubtitle: {
     fontSize: 13,
-    marginTop: 4,
   },
   searchContainer: {
     marginTop: 4,
