@@ -8,6 +8,7 @@ import {
   Text,
   View,
   useColorScheme,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -48,6 +49,7 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
   const isDark = colorScheme === "dark";
   const theme = Colors[isDark ? "dark" : "light"];
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
 
   if (!property) return null;
 
@@ -68,10 +70,9 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
           style={[
             styles.sheet,
             {
+              width: screenWidth,
               backgroundColor: theme.backgroundSecondary,
               paddingBottom: insets.bottom + 16,
-              paddingLeft: insets.left,
-              paddingRight: insets.right,
             },
           ]}
         >
@@ -171,7 +172,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
   },
   sheet: {
-    width: "100%",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: "85%",
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 12,
     paddingBottom: 16,
   },
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
   },
   scrollContent: {
-    padding: 20,
+    padding: 24,
   },
   sectionTitle: {
     fontSize: 11,
