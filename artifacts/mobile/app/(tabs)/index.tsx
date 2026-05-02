@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useScrollToTop } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
@@ -142,7 +143,11 @@ export default function DirectoryScreen() {
         style={styles.headerBanner}
         resizeMode="cover"
       >
-        <View style={styles.headerOverlay}>
+        <LinearGradient
+          colors={["transparent", "rgba(7,59,76,0.55)", "rgba(7,59,76,0.88)"]}
+          locations={[0.0, 0.5, 1.0]}
+          style={styles.headerOverlay}
+        >
           <View style={styles.headerContent}>
             <View style={styles.headerTop}>
               <Feather name="map-pin" size={18} color="#FFD94A" />
@@ -153,11 +158,11 @@ export default function DirectoryScreen() {
             <Text style={[styles.headerTitle, { color: "#FFFFFF", fontFamily: "Inter_700Bold" }]}>
               Resident Directory
             </Text>
-            <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.75)", fontFamily: "Inter_400Regular" }]}>
+            <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.80)", fontFamily: "Inter_400Regular" }]}>
               Sarasota, FL 34243{syncInfo?.count ? ` · ${syncInfo.count} units` : ""}
             </Text>
           </View>
-        </View>
+        </LinearGradient>
       </ImageBackground>
 
       <SyncStatus
@@ -307,11 +312,10 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   headerBanner: {
-    height: 200,
+    height: 240,
   },
   headerOverlay: {
     flex: 1,
-    backgroundColor: "rgba(7,59,76,0.72)",
     paddingTop: 24,
     paddingBottom: 28,
     paddingHorizontal: 20,
