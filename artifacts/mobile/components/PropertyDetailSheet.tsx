@@ -164,6 +164,7 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: "flex-end",
+    alignItems: "stretch",
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,

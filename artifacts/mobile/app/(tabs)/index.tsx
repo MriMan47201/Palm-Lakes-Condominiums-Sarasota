@@ -71,11 +71,7 @@ export default function DirectoryScreen() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
-    const parent = navigation.getParent();
-    const unsubscribe = parent?.addListener("tabPress" as never, () => {
-      // Check state directly — isFocused() is unreliable right after a Modal closes
-      const state = parent?.getState() as { routes: { name: string }[]; index: number } | undefined;
-      if (state?.routes[state.index]?.name !== "index") return;
+    const unsubscribe = navigation.addListener("tabPress" as never, () => {
       setSearch("");
       setDebouncedSearch("");
       requestAnimationFrame(() => {
@@ -84,7 +80,7 @@ export default function DirectoryScreen() {
         });
       });
     });
-    return () => unsubscribe?.();
+    return unsubscribe;
   }, [navigation]);
 
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
