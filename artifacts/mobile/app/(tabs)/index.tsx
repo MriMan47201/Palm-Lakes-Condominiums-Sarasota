@@ -141,7 +141,7 @@ export default function DirectoryScreen() {
     <View>
       <ImageBackground
         source={ENTRANCE_IMAGE}
-        style={[styles.headerBanner, { height: 240 + insets.top }]}
+        style={styles.headerBanner}
         resizeMode="cover"
       >
         <LinearGradient
