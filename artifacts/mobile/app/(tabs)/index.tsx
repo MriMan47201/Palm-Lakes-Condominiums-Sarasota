@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   FlatList,
   ImageBackground,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -152,7 +153,7 @@ export default function DirectoryScreen() {
           <View style={styles.headerContent}>
             <View style={styles.headerTop}>
               <Feather name="map-pin" size={18} color="#FFD94A" />
-              <Text style={[styles.subdivisionLabel, { color: "#FFE880", fontFamily: "Inter_700Bold", textShadowColor: "rgba(0,0,0,0.95)", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 4 }]}>
+              <Text style={[styles.subdivisionLabel, { color: "#FFE880", fontFamily: "Inter_700Bold" }, Platform.select({ web: { textShadow: "0px 0px 4px rgba(0,0,0,0.95)" } as any, default: { textShadowColor: "rgba(0,0,0,0.95)", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 4 } })]}>
                 {SUBDIVISION_NAME}
               </Text>
             </View>

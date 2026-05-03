@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "PLC Directory",
+    "name": "Palm Lakes",
     "slug": "plcdirectory",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,19 +9,33 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash-icon.png",
+      "image": "./assets/images/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0F1B2E"
+      "backgroundColor": "#073B4C"
     },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.plcdirectory.app"
     },
     "android": {
-      "package": "com.plcdirectory.app"
+      "package": "com.plcdirectory.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#073B4C"
+      }
     },
     "web": {
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/icon.png",
+      "name": "Palm Lakes Condominiums",
+      "shortName": "Palm Lakes",
+      "description": "Resident Directory for Palm Lakes Condominiums, Sarasota · Manatee, FL 34243",
+      "themeColor": "#073B4C",
+      "backgroundColor": "#073B4C",
+      "display": "standalone",
+      "orientation": "portrait",
+      "lang": "en-US",
+      "scope": "/",
+      "startUrl": "/"
     },
     "plugins": [
       [

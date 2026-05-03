@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import React from "react";
 import {
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -48,9 +49,18 @@ export default function PropertyCard({ property, onPress, searchQuery = "" }: Pr
       onPress={() => onPress?.(property)}
       style={({ pressed }) => [
         styles.card,
+        Platform.select({
+          web: { boxShadow: `0px 2px 8px ${theme.shadow}` } as any,
+          default: {
+            shadowColor: theme.shadow,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 1,
+            shadowRadius: 8,
+            elevation: 3,
+          },
+        }),
         {
           backgroundColor: theme.card,
-          shadowColor: theme.shadow,
           opacity: pressed ? 0.92 : 1,
           transform: [{ scale: pressed ? 0.985 : 1 }],
         },
@@ -128,10 +138,6 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     flexDirection: "row",
     alignItems: "stretch",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 3,
     overflow: "hidden",
   },
   accentBar: {
