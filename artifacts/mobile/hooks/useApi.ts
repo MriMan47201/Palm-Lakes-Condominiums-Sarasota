@@ -92,7 +92,8 @@ export function useProperties(params: { search?: string; page?: number; limit?: 
   return useQuery({
     queryKey: ["properties", params],
     queryFn: () => fetchProperties(params),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    gcTime: 0,
     retry: 2,
   });
 }
