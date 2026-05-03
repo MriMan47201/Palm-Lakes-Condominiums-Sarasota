@@ -56,6 +56,8 @@ export type SyncResult = {
   syncedAt: string;
 };
 
+const NO_CACHE: RequestInit = { cache: "no-store" };
+
 async function fetchProperties(params: {
   search?: string;
   page?: number;
@@ -66,14 +68,14 @@ async function fetchProperties(params: {
     page: params.page,
     limit: params.limit,
   });
-  const response = await fetch(url);
+  const response = await fetch(url, NO_CACHE);
   if (!response.ok) throw new Error("Failed to fetch properties");
   return response.json();
 }
 
 async function fetchLastSync(): Promise<SyncInfo> {
   const url = buildUrl("/properties/last-sync");
-  const response = await fetch(url);
+  const response = await fetch(url, NO_CACHE);
   if (!response.ok) throw new Error("Failed to fetch sync info");
   return response.json();
 }
