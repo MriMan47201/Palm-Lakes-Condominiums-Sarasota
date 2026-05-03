@@ -152,7 +152,7 @@ export default function DirectoryScreen() {
           <View style={styles.headerContent}>
             <View style={styles.headerTop}>
               <Feather name="map-pin" size={18} color="#FFD94A" />
-              <Text style={[styles.subdivisionLabel, { color: "#FFD94A", fontFamily: "Inter_700Bold" }]}>
+              <Text style={[styles.subdivisionLabel, { color: "#FFE880", fontFamily: "Inter_700Bold", textShadowColor: "rgba(0,0,0,0.95)", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 4 }]}>
                 {SUBDIVISION_NAME}
               </Text>
             </View>
@@ -344,12 +344,14 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 19,
     lineHeight: 25,
+    marginLeft: 24,
   },
   headerSubtitleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 4,
+    marginLeft: 24,
   },
   headerSubtitle: {
     fontSize: 13,
