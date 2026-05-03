@@ -141,13 +141,13 @@ export default function DirectoryScreen() {
     <View>
       <ImageBackground
         source={ENTRANCE_IMAGE}
-        style={styles.headerBanner}
+        style={[styles.headerBanner, { height: 240 + insets.top }]}
         resizeMode="cover"
       >
         <LinearGradient
           colors={["transparent", "rgba(7,59,76,0.55)", "rgba(7,59,76,0.88)"]}
           locations={[0.0, 0.5, 1.0]}
-          style={styles.headerOverlay}
+          style={[styles.headerOverlay, { paddingTop: insets.top + 24 }]}
         >
           <View style={styles.headerContent}>
             <View style={styles.headerTop}>
@@ -225,7 +225,7 @@ export default function DirectoryScreen() {
         </View>
       )}
     </View>
-  ), [isDark, theme, syncInfo, syncMutation.isPending, search, debouncedSearch, total, isLoading, handleSync, handleSearchChange, sortMode]);
+  ), [isDark, theme, syncInfo, syncMutation.isPending, search, debouncedSearch, total, isLoading, handleSync, handleSearchChange, sortMode, insets]);
 
   const renderItem = useCallback(
     ({ item }: { item: Property }) => (
@@ -286,7 +286,7 @@ export default function DirectoryScreen() {
         renderItem={renderItem}
         ListHeaderComponent={ListHeader}
         ListEmptyComponent={EmptyState}
-        contentInsetAdjustmentBehavior="automatic"
+        contentInsetAdjustmentBehavior="never"
         contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 20 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -322,7 +322,6 @@ const styles = StyleSheet.create({
   },
   headerOverlay: {
     flex: 1,
-    paddingTop: 24,
     paddingBottom: 28,
     paddingHorizontal: 20,
     justifyContent: "flex-end",
