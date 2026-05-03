@@ -1,6 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { pool } from "@workspace/db";
+import { doSync } from "./lib/sync";
 
 async function ensureSchema() {
   const client = await pool.connect();
@@ -34,12 +35,27 @@ async function ensureSchema() {
   }
 }
 
+async function ensureData() {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      `SELECT COUNT(*) FROM properties WHERE lot_number IS NOT NULL`
+    );
+    const hasLotNumbers = parseInt(result.rows[0].count, 10) > 0;
+    if (!hasLotNumbers) {
+      logger.info("No lot number data found — running startup sync");
+      await doSync();
+      logger.info("Startup sync complete");
+    }
+  } finally {
+    client.release();
+  }
+}
+
 const rawPort = process.env["PORT"];
 
 if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
+  throw new Error("PORT environment variable is required but was not provided.");
 }
 
 const port = Number(rawPort);
@@ -49,13 +65,14 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 ensureSchema()
+  .then(() => ensureData())
   .then(() => {
     app.listen(port, () => {
       logger.info({ port }, "Server listening");
     });
   })
   .catch((err) => {
-    logger.error({ err }, "Failed to ensure schema, starting anyway");
+    logger.error({ err }, "Startup error, starting anyway");
     app.listen(port, () => {
       logger.info({ port }, "Server listening");
     });
