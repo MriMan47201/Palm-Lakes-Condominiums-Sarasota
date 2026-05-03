@@ -83,6 +83,7 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
               <Text style={[styles.headerAddress, { color: theme.text, fontFamily: "Inter_700Bold" }]}>
                 {property.address}
               </Text>
+              <Text style={{ color: "red", fontSize: 10 }}>{`[debug lot: ${JSON.stringify((property as any).lotNumber)}]`}</Text>
               {property.lotNumber && /^\d+$/.test(property.lotNumber.trim()) ? (
                 <Text style={[styles.headerUnit, { color: theme.textSecondary, fontFamily: "Inter_400Regular" }]}>
                   Unit No. {property.lotNumber.trim()}
