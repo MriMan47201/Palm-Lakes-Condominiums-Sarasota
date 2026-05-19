@@ -288,7 +288,7 @@ export default function DirectoryScreen() {
         ListHeaderComponent={ListHeader}
         ListEmptyComponent={EmptyState}
         contentInsetAdjustmentBehavior="never"
-        contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 20 }]}
+        contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 80 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
