@@ -1,8 +1,12 @@
 import { db, propertiesTable, syncLogTable } from "@workspace/db";
-import { desc, count, sql } from "drizzle-orm";
+import { desc, count, sql, eq } from "drizzle-orm";
 import { logger } from "./logger";
 
 const SUBDIV_NAME = "PALM LAKES A CONDOMINIUM";
+
+const LABEL_OVERRIDES: Record<string, string> = {
+  "7704 31ST ST E": "PALM LAKES (Lift Station)",
+};
 const GIS_BASE =
   "https://gis.manateepao.gov/arcgis/rest/services/Website/WebLayers/MapServer/0/query";
 
@@ -123,6 +127,12 @@ export async function doSync() {
     const missing = PINNED_ENTRIES.filter((e) => !gisAddresses.has(e.address));
     if (missing.length > 0) {
       await db.insert(propertiesTable).values(missing);
+    }
+    for (const [address, ownerName] of Object.entries(LABEL_OVERRIDES)) {
+      await db
+        .update(propertiesTable)
+        .set({ ownerName })
+        .where(eq(propertiesTable.address, address));
     }
     await db.insert(syncLogTable).values({
       count: result.properties.length,
