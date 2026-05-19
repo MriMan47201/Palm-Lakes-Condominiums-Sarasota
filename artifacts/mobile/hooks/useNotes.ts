@@ -26,3 +26,32 @@ export function useNote(parcelId: string) {
 
   return { note, saveNote, loaded };
 }
+
+export function useAllNotes() {
+  const [notes, setNotes] = useState<Record<string, string>>({});
+
+  const reload = useCallback(async () => {
+    try {
+      const keys = (await AsyncStorage.getAllKeys()) as string[];
+      const noteKeys = keys.filter((k) => k.startsWith(NOTES_PREFIX));
+      if (noteKeys.length === 0) {
+        setNotes({});
+        return;
+      }
+      const pairs = await AsyncStorage.multiGet(noteKeys);
+      const map: Record<string, string> = {};
+      for (const [key, val] of pairs) {
+        if (val) map[key.replace(NOTES_PREFIX, "")] = val;
+      }
+      setNotes(map);
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
+
+  useEffect(() => {
+    reload();
+  }, [reload]);
+
+  return { notes, reload };
+}

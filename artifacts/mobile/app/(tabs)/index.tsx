@@ -24,6 +24,7 @@ import SearchBar from "@/components/SearchBar";
 import SyncStatus from "@/components/SyncStatus";
 import PropertyDetailSheet from "@/components/PropertyDetailSheet";
 import { useProperties, useSyncInfo, useSyncProperties, type Property } from "@/hooks/useApi";
+import { useAllNotes } from "@/hooks/useNotes";
 
 const ENTRANCE_IMAGE = require("../../assets/images/main-entrance.jpg");
 
@@ -97,23 +98,35 @@ export default function DirectoryScreen() {
   }, []);
 
   const { data, isLoading, refetch } = useProperties({
-    search: debouncedSearch,
     page: 1,
     limit: 500,
   });
 
   const { data: syncInfo, refetch: refetchSync } = useSyncInfo();
   const syncMutation = useSyncProperties();
+  const { notes: allNotes, reload: reloadNotes } = useAllNotes();
 
-  const properties = data?.properties ?? [];
-  const total = data?.total ?? 0;
+  const allProperties = data?.properties ?? [];
+
+  const filteredProperties = useMemo(() => {
+    if (!debouncedSearch) return allProperties;
+    const q = debouncedSearch.toLowerCase();
+    return allProperties.filter(
+      (p) =>
+        p.address.toLowerCase().includes(q) ||
+        (p.ownerName && p.ownerName.toLowerCase().includes(q)) ||
+        (allNotes[p.parcelId] && allNotes[p.parcelId].toLowerCase().includes(q))
+    );
+  }, [allProperties, debouncedSearch, allNotes]);
+
+  const total = filteredProperties.length;
 
   const sortedProperties = useMemo(() => {
     if (sortMode === "street") {
-      return [...properties].sort(sortByStreet);
+      return [...filteredProperties].sort(sortByStreet);
     }
-    return properties;
-  }, [properties, sortMode]);
+    return filteredProperties;
+  }, [filteredProperties, sortMode]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -305,7 +318,7 @@ export default function DirectoryScreen() {
       <PropertyDetailSheet
         property={selectedProperty}
         visible={!!selectedProperty}
-        onClose={() => setSelectedProperty(null)}
+        onClose={() => { setSelectedProperty(null); reloadNotes(); }}
       />
     </View>
   );
