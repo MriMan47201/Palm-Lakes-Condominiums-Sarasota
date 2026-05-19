@@ -195,7 +195,7 @@ export default function DirectoryScreen() {
         <SearchBar
           value={search}
           onChangeText={handleSearchChange}
-          placeholder="Search owners or addresses..."
+          placeholder="Search owners, addresses, or notes..."
         />
       </View>
 
