@@ -110,7 +110,10 @@ export default function DirectoryScreen() {
 
   const filteredProperties = useMemo(() => {
     if (!debouncedSearch) return allProperties;
-    const q = debouncedSearch.toLowerCase();
+    const q = debouncedSearch.toLowerCase().trim();
+    if (q === "notes") {
+      return allProperties.filter((p) => !!allNotes[p.parcelId]);
+    }
     return allProperties.filter(
       (p) =>
         p.address.toLowerCase().includes(q) ||
