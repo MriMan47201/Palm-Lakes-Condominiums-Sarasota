@@ -173,7 +173,7 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
   const isDark = colorScheme === "dark";
   const theme = Colors[isDark ? "dark" : "light"];
   const insets = useSafeAreaInsets();
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
   if (!property) return null;
 
@@ -194,13 +194,13 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
           style={[
             styles.sheet,
             {
-              width: screenWidth,
+              width: Math.min(screenWidth - 32, 480),
+              maxHeight: screenHeight * 0.82,
               backgroundColor: theme.backgroundSecondary,
-              paddingBottom: insets.bottom + 16,
+              paddingBottom: insets.bottom + 8,
             },
           ]}
         >
-          <View style={[styles.handle, { backgroundColor: theme.separator }]} />
 
           <View style={styles.header}>
             <View style={styles.headerInfo}>
@@ -258,25 +258,21 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    justifyContent: "flex-end",
-    alignItems: "stretch",
+    justifyContent: "center",
+    alignItems: "center",
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.55)",
   },
   sheet: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "85%",
-  },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    alignSelf: "center",
-    marginTop: 10,
-    marginBottom: 4,
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 16,
   },
   header: {
     flexDirection: "row",
