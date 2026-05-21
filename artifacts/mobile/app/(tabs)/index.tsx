@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useScrollToTop } from "@react-navigation/native";
-import { useNavigation } from "expo-router";
+import { useFocusEffect, useNavigation } from "expo-router";
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import {
   ActivityIndicator,
@@ -59,11 +59,25 @@ function sortByStreet(a: Property, b: Property): number {
   return numA - numB;
 }
 
+function resetViewportZoom() {
+  if (Platform.OS !== "web") return;
+  const viewport = document.querySelector("meta[name=viewport]") as HTMLMetaElement | null;
+  if (!viewport) return;
+  viewport.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1");
+  setTimeout(() => {
+    viewport.setAttribute("content", "width=device-width, initial-scale=1");
+  }, 50);
+}
+
 export default function DirectoryScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const theme = Colors[isDark ? "dark" : "light"];
   const insets = useSafeAreaInsets();
+
+  useFocusEffect(useCallback(() => {
+    resetViewportZoom();
+  }, []));
 
   const listRef = useRef<FlatList>(null);
   useScrollToTop(listRef);
@@ -321,7 +335,7 @@ export default function DirectoryScreen() {
       <PropertyDetailSheet
         property={selectedProperty}
         visible={!!selectedProperty}
-        onClose={() => { setSelectedProperty(null); reloadNotes(); }}
+        onClose={() => { setSelectedProperty(null); reloadNotes(); resetViewportZoom(); }}
       />
     </View>
   );
