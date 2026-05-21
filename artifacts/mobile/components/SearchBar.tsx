@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
-import React from "react";
+import React, { useCallback } from "react";
 import {
+  Platform,
   Pressable,
   StyleSheet,
   TextInput,
@@ -20,12 +21,23 @@ export default function SearchBar({ value, onChangeText, placeholder = "Search b
   const isDark = colorScheme === "dark";
   const theme = Colors[isDark ? "dark" : "light"];
 
+  const handleBlur = useCallback(() => {
+    if (Platform.OS !== "web") return;
+    const viewport = document.querySelector("meta[name=viewport]") as HTMLMetaElement | null;
+    if (!viewport) return;
+    viewport.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1");
+    setTimeout(() => {
+      viewport.setAttribute("content", "width=device-width, initial-scale=1");
+    }, 50);
+  }, []);
+
   return (
     <View style={[styles.container, { backgroundColor: isDark ? theme.navyMid : theme.backgroundSecondary, borderColor: theme.separator }]}>
       <Feather name="search" size={16} color={theme.textMuted} style={styles.icon} />
       <TextInput
         value={value}
         onChangeText={onChangeText}
+        onBlur={handleBlur}
         placeholder={placeholder}
         placeholderTextColor={theme.textMuted}
         style={[styles.input, { color: theme.text, fontFamily: "Inter_400Regular" }]}
