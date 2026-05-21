@@ -392,6 +392,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 24,
     gap: 16,
+    width: "100%",
   },
   noteModalHeader: {
     flexDirection: "row",
