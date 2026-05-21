@@ -67,10 +67,22 @@ function getDeploymentDomain() {
     return stripProtocol(process.env.EXPO_PUBLIC_DOMAIN);
   }
 
-  console.error(
-    "ERROR: No deployment domain found. Set REPLIT_INTERNAL_APP_DOMAIN, REPLIT_DEV_DOMAIN, or EXPO_PUBLIC_DOMAIN",
+  // Netlify CI: DEPLOY_PRIME_URL is the URL of this specific deploy (branch/PR),
+  // URL is the canonical production URL.
+  if (process.env.DEPLOY_PRIME_URL) {
+    return stripProtocol(process.env.DEPLOY_PRIME_URL);
+  }
+
+  if (process.env.URL) {
+    return stripProtocol(process.env.URL);
+  }
+
+  // Generic CI fallback — build continues; set EXPO_PUBLIC_DOMAIN to override.
+  console.warn(
+    "WARNING: No deployment domain found. Falling back to localhost. " +
+    "Set EXPO_PUBLIC_DOMAIN (or DEPLOY_PRIME_URL on Netlify) to use the real domain.",
   );
-  process.exit(1);
+  return "localhost";
 }
 
 function prepareDirectories(timestamp) {

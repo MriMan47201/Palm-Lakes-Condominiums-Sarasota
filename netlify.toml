@@ -1,0 +1,23 @@
+[build]
+  base    = "artifacts/mobile"
+  command = "pnpm exec expo export --platform web"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Proxy /api/* to the live Replit API server.
+# Set your deployed Replit URL as REPLIT_API_URL in Netlify → Site settings → Environment variables,
+# then update the `to` value below to match, e.g.:
+#   to = "https://your-repl-name.replit.app/api/:splat"
+[[redirects]]
+  from   = "/api/*"
+  to     = "https://your-replit-app.replit.app/api/:splat"
+  status = 200
+  force  = true
+
+# SPA fallback — all unmatched routes serve index.html
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
