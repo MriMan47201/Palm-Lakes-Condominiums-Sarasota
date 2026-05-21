@@ -2,7 +2,7 @@ import { pgTable, serial, text, timestamp, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const propertiesTable = pgTable("properties", {
+export const propertiesTable = pgTable("plc_properties", {
   id: serial("id").primaryKey(),
   parcelId: text("parcel_id").notNull(),
   address: text("address").notNull(),
@@ -17,7 +17,7 @@ export const propertiesTable = pgTable("properties", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const syncLogTable = pgTable("sync_log", {
+export const syncLogTable = pgTable("plc_sync_log", {
   id: serial("id").primaryKey(),
   syncedAt: timestamp("synced_at").defaultNow().notNull(),
   count: integer("count").notNull().default(0),

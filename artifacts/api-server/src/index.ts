@@ -7,7 +7,7 @@ async function ensureSchema() {
   const client = await pool.connect();
   try {
     await client.query(`
-      CREATE TABLE IF NOT EXISTS properties (
+      CREATE TABLE IF NOT EXISTS plc_properties (
         id serial PRIMARY KEY,
         parcel_id text NOT NULL,
         address text NOT NULL,
@@ -20,8 +20,8 @@ async function ensureSchema() {
         total_value text,
         updated_at timestamp DEFAULT now() NOT NULL
       );
-      ALTER TABLE properties ADD COLUMN IF NOT EXISTS lot_number text;
-      CREATE TABLE IF NOT EXISTS sync_log (
+      ALTER TABLE plc_properties ADD COLUMN IF NOT EXISTS lot_number text;
+      CREATE TABLE IF NOT EXISTS plc_sync_log (
         id serial PRIMARY KEY,
         synced_at timestamp DEFAULT now() NOT NULL,
         count integer NOT NULL DEFAULT 0,
@@ -39,7 +39,7 @@ async function ensureData() {
   const client = await pool.connect();
   try {
     const result = await client.query(
-      `SELECT COUNT(*) FROM properties WHERE lot_number IS NOT NULL`
+      `SELECT COUNT(*) FROM plc_properties WHERE lot_number IS NOT NULL`
     );
     const hasLotNumbers = parseInt(result.rows[0].count, 10) > 0;
     if (!hasLotNumbers) {
