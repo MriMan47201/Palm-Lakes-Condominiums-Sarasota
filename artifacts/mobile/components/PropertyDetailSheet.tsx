@@ -54,6 +54,16 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
   const [draft, setDraft] = useState("");
   const [dirty, setDirty] = useState(false);
 
+  const resetZoom = useCallback(() => {
+    if (Platform.OS !== "web") return;
+    const viewport = document.querySelector("meta[name=viewport]") as HTMLMetaElement | null;
+    if (!viewport) return;
+    viewport.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1");
+    setTimeout(() => {
+      viewport.setAttribute("content", "width=device-width, initial-scale=1");
+    }, 50);
+  }, []);
+
   useEffect(() => {
     if (editing) {
       setDraft(note);
@@ -137,6 +147,7 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
               ]}
               value={draft}
               onChangeText={handleChange}
+              onBlur={resetZoom}
               multiline
               maxLength={288}
               placeholder="Write your note here…"
@@ -381,6 +392,8 @@ const styles = StyleSheet.create({
   noteModalOuter: {
     flex: 1,
     justifyContent: "flex-end",
+    width: "100%",
+    overflow: "hidden",
   },
   noteModalBackdrop: {
     ...StyleSheet.absoluteFillObject,
@@ -409,7 +422,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     padding: 12,
-    fontSize: 15,
+    fontSize: 16,
     lineHeight: 22,
     minHeight: 120,
     maxHeight: 200,
