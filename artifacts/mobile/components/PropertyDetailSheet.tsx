@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
   noteModalActions: {
     flexDirection: "row",
     gap: 12,
-    justifyContent: "flex-end",
+    justifyContent: "flex-start",
   },
   noteBtn: {
     flexDirection: "row",
