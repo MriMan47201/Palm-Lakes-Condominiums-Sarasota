@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import {
   Platform,
@@ -92,7 +92,7 @@ export default function PropertyCard({ property, onPress, searchQuery = "" }: Pr
 
         <View style={styles.ownerRow}>
           <View style={[styles.ownerIcon, { backgroundColor: theme.tint + "22" }]}>
-            <Feather name="user" size={14} color={theme.tint} />
+            <MaterialCommunityIcons name="human" size={16} color={theme.tint} />
           </View>
           {highlightText(
             property.ownerName,

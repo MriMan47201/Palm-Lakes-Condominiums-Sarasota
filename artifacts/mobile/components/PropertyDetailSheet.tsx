@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -24,7 +24,7 @@ type Props = {
   onClose: () => void;
 };
 
-function DetailRow({ label, value, icon }: { label: string; value: string | null | undefined; icon: string }) {
+function DetailRow({ label, value, icon, customIcon }: { label: string; value: string | null | undefined; icon?: string; customIcon?: React.ReactNode }) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const theme = Colors[isDark ? "dark" : "light"];
@@ -34,7 +34,7 @@ function DetailRow({ label, value, icon }: { label: string; value: string | null
   return (
     <View style={[styles.detailRow, { borderBottomColor: theme.separator }]}>
       <View style={[styles.detailIcon, { backgroundColor: theme.tint + "18" }]}>
-        <Feather name={icon as "home"} size={14} color={theme.tint} />
+        {customIcon ?? <Feather name={icon as "home"} size={14} color={theme.tint} />}
       </View>
       <View style={styles.detailContent}>
         <Text style={[styles.detailLabel, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
@@ -247,7 +247,7 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
             </Text>
 
             <View style={[styles.detailsCard, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary, borderColor: theme.separator }]}>
-              <DetailRow label="Owner" value={property.ownerName} icon="user" />
+              <DetailRow label="Owner" value={property.ownerName} customIcon={<MaterialCommunityIcons name="human" size={16} color={theme.tint} />} />
               <DetailRow label="Parcel ID" value={property.parcelId} icon="hash" />
               {mailingIsDifferent && (
                 <DetailRow label="Mailing Address" value={property.mailingAddress} icon="mail" />
