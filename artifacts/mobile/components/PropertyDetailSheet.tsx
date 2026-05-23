@@ -1,6 +1,6 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Modal,
   Pressable,
@@ -25,7 +25,7 @@ type Props = {
   onClose: () => void;
 };
 
-function DetailRow({ label, value, icon, customIcon }: { label: string; value: string | null | undefined; icon?: string; customIcon?: React.ReactNode }) {
+function DetailRow({ label, value, icon, iconLib }: { label: string; value: string | null | undefined; icon: string; iconLib?: "feather" | "material-community" }) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const theme = Colors[isDark ? "dark" : "light"];
@@ -35,7 +35,9 @@ function DetailRow({ label, value, icon, customIcon }: { label: string; value: s
   return (
     <View style={[styles.detailRow, { borderBottomColor: theme.separator }]}>
       <View style={[styles.detailIcon, { backgroundColor: theme.tint + "18" }]}>
-        {customIcon ?? <Feather name={icon as "home"} size={14} color={theme.tint} />}
+        {iconLib === "material-community"
+          ? <MaterialCommunityIcons name={icon as "human"} size={16} color={theme.tint} />
+          : <Feather name={icon as "home"} size={14} color={theme.tint} />}
       </View>
       <View style={styles.detailContent}>
         <Text style={[styles.detailLabel, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
@@ -250,7 +252,7 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
             </Text>
 
             <View style={[styles.detailsCard, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary, borderColor: theme.separator }]}>
-              <DetailRow label="Owner" value={property.ownerName} customIcon={<MaterialCommunityIcons name="human" size={16} color={theme.tint} />} />
+              <DetailRow label="Owner" value={property.ownerName} icon="human" iconLib="material-community" />
               <DetailRow label="Parcel ID" value={property.parcelId} icon="hash" />
               {mailingIsDifferent && (
                 <DetailRow label="Mailing Address" value={property.mailingAddress} icon="mail" />
