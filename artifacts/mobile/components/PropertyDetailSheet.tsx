@@ -1,4 +1,5 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -200,7 +201,9 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <Pressable style={styles.backdrop} onPress={onClose} />
+        <Pressable style={styles.backdrop} onPress={onClose}>
+          <BlurView style={StyleSheet.absoluteFill} intensity={14} tint="default" />
+        </Pressable>
         <View
           style={[
             styles.sheet,
@@ -274,7 +277,6 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "transparent",
   },
   sheet: {
     borderRadius: 20,
