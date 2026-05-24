@@ -1,4 +1,4 @@
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import React, { useState, useEffect, useCallback } from "react";
 import {
@@ -25,7 +25,7 @@ type Props = {
   onClose: () => void;
 };
 
-function DetailRow({ label, value, icon, iconLib }: { label: string; value: string | null | undefined; icon: string; iconLib?: "feather" | "material-community" }) {
+function DetailRow({ label, value, icon, iconLib }: { label: string; value: string | null | undefined; icon: string; iconLib?: "feather" | "ionicons" }) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const theme = Colors[isDark ? "dark" : "light"];
@@ -35,8 +35,8 @@ function DetailRow({ label, value, icon, iconLib }: { label: string; value: stri
   return (
     <View style={[styles.detailRow, { borderBottomColor: theme.separator }]}>
       <View style={[styles.detailIcon, { backgroundColor: (isDark ? theme.tintLight : theme.tint) + "18" }]}>
-        {iconLib === "material-community"
-          ? <MaterialCommunityIcons name={icon as "human"} size={16} color={isDark ? theme.tintLight : theme.tint} />
+        {iconLib === "ionicons"
+          ? <Ionicons name={icon as "person"} size={16} color={isDark ? theme.tintLight : theme.tint} />
           : <Feather name={icon as "home"} size={14} color={isDark ? theme.tintLight : theme.tint} />}
       </View>
       <View style={styles.detailContent}>
@@ -252,7 +252,7 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
             </Text>
 
             <View style={[styles.detailsCard, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary, borderColor: theme.separator }]}>
-              <DetailRow label="Owner" value={property.ownerName} icon="human" iconLib="material-community" />
+              <DetailRow label="Owner" value={property.ownerName} icon="person" iconLib="ionicons" />
               <DetailRow label="Parcel ID" value={property.parcelId} icon="hash" />
               {mailingIsDifferent && (
                 <DetailRow label="Mailing Address" value={property.mailingAddress} icon="mail" />

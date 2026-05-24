@@ -10,7 +10,7 @@
  *   - Any request that is not a GET for a same-origin static asset
  */
 
-const CACHE_NAME = "palm-lakes-v1";
+const CACHE_NAME = "palm-lakes-v3";
 
 /** Static shell assets to pre-cache on install */
 const STATIC_ASSETS = [
