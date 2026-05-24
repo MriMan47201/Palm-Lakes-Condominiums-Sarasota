@@ -240,7 +240,7 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
               style={[styles.closeBtn, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary }]}
               hitSlop={8}
             >
-              <Feather name="x" size={18} color={theme.text} />
+              <Text style={{ fontSize: 18, color: theme.text, lineHeight: 18 }}>✕</Text>
             </Pressable>
           </View>
 
