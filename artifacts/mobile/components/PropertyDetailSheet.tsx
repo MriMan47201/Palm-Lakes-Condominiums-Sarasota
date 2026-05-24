@@ -1,5 +1,6 @@
-import { Feather } from "@expo/vector-icons";
 import StickFigureIcon from "./StickFigureIcon";
+import HashIcon from "./HashIcon";
+import EnvelopeIcon from "./EnvelopeIcon";
 import { BlurView } from "expo-blur";
 import React, { useState, useEffect, useCallback } from "react";
 import {
@@ -26,19 +27,20 @@ type Props = {
   onClose: () => void;
 };
 
-function DetailRow({ label, value, icon, iconLib }: { label: string; value: string | null | undefined; icon: string; iconLib?: "feather" | "ionicons" }) {
+function DetailRow({ label, value, icon }: { label: string; value: string | null | undefined; icon: "person" | "hash" | "mail" }) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const theme = Colors[isDark ? "dark" : "light"];
+  const iconColor = isDark ? theme.tintLight : theme.tint;
 
   if (!value) return null;
 
   return (
     <View style={[styles.detailRow, { borderBottomColor: theme.separator }]}>
-      <View style={[styles.detailIcon, { backgroundColor: (isDark ? theme.tintLight : theme.tint) + "18" }]}>
-        {iconLib === "ionicons"
-          ? <StickFigureIcon size={16} color={isDark ? theme.tintLight : theme.tint} />
-          : <Feather name={icon as "home"} size={14} color={isDark ? theme.tintLight : theme.tint} />}
+      <View style={[styles.detailIcon, { backgroundColor: iconColor + "18" }]}>
+        {icon === "person" && <StickFigureIcon size={16} color={iconColor} />}
+        {icon === "hash"   && <HashIcon size={14} color={iconColor} />}
+        {icon === "mail"   && <EnvelopeIcon size={14} color={iconColor} />}
       </View>
       <View style={styles.detailContent}>
         <Text style={[styles.detailLabel, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
@@ -253,7 +255,7 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
             </Text>
 
             <View style={[styles.detailsCard, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary, borderColor: theme.separator }]}>
-              <DetailRow label="Owner" value={property.ownerName} icon="person" iconLib="ionicons" />
+              <DetailRow label="Owner" value={property.ownerName} icon="person" />
               <DetailRow label="Parcel ID" value={property.parcelId} icon="hash" />
               {mailingIsDifferent && (
                 <DetailRow label="Mailing Address" value={property.mailingAddress} icon="mail" />
