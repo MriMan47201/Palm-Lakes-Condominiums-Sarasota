@@ -1,4 +1,5 @@
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
+import StickFigureIcon from "./StickFigureIcon";
 import React from "react";
 import {
   Platform,
@@ -92,7 +93,7 @@ export default function PropertyCard({ property, onPress, searchQuery = "" }: Pr
 
         <View style={styles.ownerRow}>
           <View style={[styles.ownerIcon, { backgroundColor: (isDark ? theme.tintLight : theme.tint) + "22" }]}>
-            <Ionicons name="person" size={16} color={isDark ? theme.tintLight : theme.tint} />
+            <StickFigureIcon size={16} color={isDark ? theme.tintLight : theme.tint} />
           </View>
           {highlightText(
             property.ownerName,

@@ -1,4 +1,5 @@
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
+import StickFigureIcon from "./StickFigureIcon";
 import { BlurView } from "expo-blur";
 import React, { useState, useEffect, useCallback } from "react";
 import {
@@ -36,7 +37,7 @@ function DetailRow({ label, value, icon, iconLib }: { label: string; value: stri
     <View style={[styles.detailRow, { borderBottomColor: theme.separator }]}>
       <View style={[styles.detailIcon, { backgroundColor: (isDark ? theme.tintLight : theme.tint) + "18" }]}>
         {iconLib === "ionicons"
-          ? <Ionicons name={icon as "person"} size={16} color={isDark ? theme.tintLight : theme.tint} />
+          ? <StickFigureIcon size={16} color={isDark ? theme.tintLight : theme.tint} />
           : <Feather name={icon as "home"} size={14} color={isDark ? theme.tintLight : theme.tint} />}
       </View>
       <View style={styles.detailContent}>
