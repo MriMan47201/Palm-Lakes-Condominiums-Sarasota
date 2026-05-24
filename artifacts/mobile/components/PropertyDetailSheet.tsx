@@ -34,10 +34,10 @@ function DetailRow({ label, value, icon, iconLib }: { label: string; value: stri
 
   return (
     <View style={[styles.detailRow, { borderBottomColor: theme.separator }]}>
-      <View style={[styles.detailIcon, { backgroundColor: theme.tint + "18" }]}>
+      <View style={[styles.detailIcon, { backgroundColor: (isDark ? theme.tintLight : theme.tint) + "18" }]}>
         {iconLib === "material-community"
-          ? <MaterialCommunityIcons name={icon as "human"} size={16} color={theme.tint} />
-          : <Feather name={icon as "home"} size={14} color={theme.tint} />}
+          ? <MaterialCommunityIcons name={icon as "human"} size={16} color={isDark ? theme.tintLight : theme.tint} />
+          : <Feather name={icon as "home"} size={14} color={isDark ? theme.tintLight : theme.tint} />}
       </View>
       <View style={styles.detailContent}>
         <Text style={[styles.detailLabel, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>

@@ -71,7 +71,7 @@ export default function PropertyCard({ property, onPress, searchQuery = "" }: Pr
       <View style={styles.content}>
         <View style={styles.addressRow}>
           <View style={[styles.numberBadge, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary }]}>
-            <Text style={[styles.numberText, { color: theme.tint, fontFamily: "Inter_700Bold" }]}>
+            <Text style={[styles.numberText, { color: isDark ? theme.tintLight : theme.tint, fontFamily: "Inter_700Bold" }]}>
               {streetNumber}
             </Text>
           </View>
@@ -91,8 +91,8 @@ export default function PropertyCard({ property, onPress, searchQuery = "" }: Pr
         <View style={[styles.divider, { backgroundColor: theme.separator }]} />
 
         <View style={styles.ownerRow}>
-          <View style={[styles.ownerIcon, { backgroundColor: theme.tint + "22" }]}>
-            <MaterialCommunityIcons name="human" size={16} color={theme.tint} />
+          <View style={[styles.ownerIcon, { backgroundColor: (isDark ? theme.tintLight : theme.tint) + "22" }]}>
+            <MaterialCommunityIcons name="human" size={16} color={isDark ? theme.tintLight : theme.tint} />
           </View>
           {highlightText(
             property.ownerName,
