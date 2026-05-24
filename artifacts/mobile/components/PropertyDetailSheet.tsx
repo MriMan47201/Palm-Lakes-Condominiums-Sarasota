@@ -107,7 +107,7 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
         style={[styles.notesPreview, { backgroundColor: inputBg, borderColor }]}
       >
         <View style={styles.notesPreviewInner}>
-          <Feather name="edit-3" size={13} color={theme.textMuted} style={styles.notesIcon} />
+          <Text style={[styles.notesIcon, { fontSize: 13, color: theme.textMuted }]}>✏</Text>
           {loaded && note.length > 0 ? (
             <Text
               style={[styles.notesPreviewText, { color: theme.text, fontFamily: "Inter_400Regular" }]}
