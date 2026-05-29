@@ -14,8 +14,10 @@ const fs = require("fs");
 const path = require("path");
 
 const STATIC_ROOT = path.resolve(__dirname, "..", "static-build");
+const WEB_ROOT = path.resolve(__dirname, "..", "dist");
 const TEMPLATE_PATH = path.resolve(__dirname, "templates", "landing-page.html");
 const basePath = (process.env.BASE_PATH || "/").replace(/\/+$/, "");
+const hasWebBuild = fs.existsSync(path.join(WEB_ROOT, "index.html"));
 
 const MIME_TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -81,6 +83,27 @@ function serveLandingPage(req, res, landingPageTemplate, appName) {
   res.end(html);
 }
 
+function serveWebFile(urlPath, res) {
+  const safePath = path.normalize(urlPath).replace(/^(\.\.(\/|\\|$))+/, "");
+  let filePath = path.join(WEB_ROOT, safePath);
+
+  if (!filePath.startsWith(WEB_ROOT)) {
+    res.writeHead(403);
+    res.end("Forbidden");
+    return;
+  }
+
+  if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+    filePath = path.join(WEB_ROOT, "index.html");
+  }
+
+  const ext = path.extname(filePath).toLowerCase();
+  const contentType = MIME_TYPES[ext] || "application/octet-stream";
+  const content = fs.readFileSync(filePath);
+  res.writeHead(200, { "content-type": contentType });
+  res.end(content);
+}
+
 function serveStaticFile(urlPath, res) {
   const safePath = path.normalize(urlPath).replace(/^(\.\.(\/|\\|$))+/, "");
   const filePath = path.join(STATIC_ROOT, safePath);
@@ -115,15 +138,13 @@ const server = http.createServer((req, res) => {
     pathname = pathname.slice(basePath.length) || "/";
   }
 
-  if (pathname === "/" || pathname === "/manifest") {
-    const platform = req.headers["expo-platform"];
-    if (platform === "ios" || platform === "android") {
-      return serveManifest(platform, res);
-    }
+  const platform = req.headers["expo-platform"];
+  if ((pathname === "/" || pathname === "/manifest") && (platform === "ios" || platform === "android")) {
+    return serveManifest(platform, res);
+  }
 
-    if (pathname === "/") {
-      return serveLandingPage(req, res, landingPageTemplate, appName);
-    }
+  if (hasWebBuild) {
+    return serveWebFile(pathname, res);
   }
 
   serveStaticFile(pathname, res);
