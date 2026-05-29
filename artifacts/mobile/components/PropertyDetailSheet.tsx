@@ -145,14 +145,12 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
       <Modal visible={editing} animationType="fade" transparent onRequestClose={handleClose}>
         <View style={styles.noteModalOuter}>
           <Pressable style={styles.noteModalBackdrop} onPress={handleClose} />
-          <ScrollView
+          <View
             style={[styles.noteModal, {
               backgroundColor: isDark ? "#0F1B2E" : "#fff",
               borderColor: theme.separator,
               bottom: keyboardHeight + 16,
             }]}
-            keyboardShouldPersistTaps="always"
-            scrollEnabled={false}
           >
             <View style={styles.noteModalHeader}>
               <Text style={[styles.noteModalTitle, { color: theme.text, fontFamily: "Inter_700Bold" }]}>
@@ -187,20 +185,20 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
 
             <View style={styles.noteModalActions}>
               <Pressable
-                onPress={handleClose}
+                onPressIn={handleClose}
                 style={[styles.noteBtn, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary, borderColor: theme.separator }]}
               >
                 <Text style={[styles.noteBtnText, { color: theme.text, fontFamily: "Inter_500Medium" }]}>Cancel</Text>
               </Pressable>
               <Pressable
-                onPress={handleSave}
+                onPressIn={handleSave}
                 style={[styles.noteBtn, styles.noteBtnPrimary, { backgroundColor: dirty ? theme.tint : theme.tint + "66" }]}
               >
                 <Feather name="save" size={14} color="#fff" />
                 <Text style={[styles.noteBtnText, { color: "#fff", fontFamily: "Inter_600SemiBold" }]}>Save</Text>
               </Pressable>
             </View>
-          </ScrollView>
+          </View>
         </View>
       </Modal>
     </>
