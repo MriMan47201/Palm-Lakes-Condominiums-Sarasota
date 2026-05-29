@@ -406,8 +406,9 @@ const styles = StyleSheet.create({
   },
   noteModalOuter: {
     flex: 1,
-    justifyContent: "flex-end",
+    justifyContent: "center",
     width: "100%",
+    paddingHorizontal: 20,
     overflow: "hidden",
   },
   noteModalBackdrop: {
@@ -415,8 +416,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.45)",
   },
   noteModal: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderRadius: 20,
     borderWidth: 1,
     padding: 24,
     gap: 16,
