@@ -5,6 +5,7 @@ import EnvelopeIcon from "./EnvelopeIcon";
 import { BlurView } from "expo-blur";
 import React, { useState, useEffect, useCallback } from "react";
 import {
+  Keyboard,
   Modal,
   Pressable,
   ScrollView,
@@ -84,12 +85,14 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
   };
 
   const handleSave = async () => {
+    Keyboard.dismiss();
     await saveNote(draft);
     setDirty(false);
     setEditing(false);
   };
 
   const handleClose = () => {
+    Keyboard.dismiss();
     setEditing(false);
   };
 
