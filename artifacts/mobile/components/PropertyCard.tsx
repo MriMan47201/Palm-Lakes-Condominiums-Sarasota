@@ -155,14 +155,14 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   numberBadge: {
-    borderRadius: 10,
-    paddingHorizontal: 11,
-    paddingVertical: 6,
-    minWidth: 56,
+    borderRadius: 9,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    minWidth: 48,
     alignItems: "center",
   },
   numberText: {
-    fontSize: 22,
+    fontSize: 18,
   },
   addressInfo: {
     flex: 1,

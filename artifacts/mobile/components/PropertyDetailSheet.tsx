@@ -15,7 +15,6 @@ import {
   View,
   useColorScheme,
   useWindowDimensions,
-  KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -61,6 +60,20 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [dirty, setDirty] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    if (!editing) { setKeyboardHeight(0); return; }
+    const show = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      (e) => setKeyboardHeight(e.endCoordinates.height)
+    );
+    const hide = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      () => setKeyboardHeight(0)
+    );
+    return () => { show.remove(); hide.remove(); };
+  }, [editing]);
 
   const resetZoom = useCallback(() => {
     if (Platform.OS !== "web") return;
@@ -130,10 +143,7 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
       </Pressable>
 
       <Modal visible={editing} animationType="slide" transparent onRequestClose={handleClose}>
-        <KeyboardAvoidingView
-          style={styles.noteModalOuter}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
+        <View style={[styles.noteModalOuter, { paddingBottom: keyboardHeight }]}>
           <Pressable style={styles.noteModalBackdrop} onPress={handleClose} />
           <ScrollView
             style={[styles.noteModal, { backgroundColor: isDark ? "#0F1B2E" : "#fff", borderColor: theme.separator }]}
@@ -187,7 +197,7 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
               </Pressable>
             </View>
           </ScrollView>
-        </KeyboardAvoidingView>
+        </View>
       </Modal>
     </>
   );
