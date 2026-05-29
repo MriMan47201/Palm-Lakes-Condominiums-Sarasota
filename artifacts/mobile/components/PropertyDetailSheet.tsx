@@ -142,11 +142,15 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
         </View>
       </Pressable>
 
-      <Modal visible={editing} animationType="slide" transparent onRequestClose={handleClose}>
-        <View style={[styles.noteModalOuter, { paddingBottom: keyboardHeight }]}>
+      <Modal visible={editing} animationType="fade" transparent onRequestClose={handleClose}>
+        <View style={styles.noteModalOuter}>
           <Pressable style={styles.noteModalBackdrop} onPress={handleClose} />
           <ScrollView
-            style={[styles.noteModal, { backgroundColor: isDark ? "#0F1B2E" : "#fff", borderColor: theme.separator }]}
+            style={[styles.noteModal, {
+              backgroundColor: isDark ? "#0F1B2E" : "#fff",
+              borderColor: theme.separator,
+              bottom: keyboardHeight + 16,
+            }]}
             keyboardShouldPersistTaps="always"
             scrollEnabled={false}
           >
@@ -416,21 +420,19 @@ const styles = StyleSheet.create({
   },
   noteModalOuter: {
     flex: 1,
-    justifyContent: "center",
-    width: "100%",
-    paddingHorizontal: 20,
-    overflow: "hidden",
   },
   noteModalBackdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.45)",
   },
   noteModal: {
+    position: "absolute",
+    left: 20,
+    right: 20,
     borderRadius: 20,
     borderWidth: 1,
     padding: 24,
     gap: 16,
-    width: "100%",
   },
   noteModalHeader: {
     flexDirection: "row",
