@@ -143,7 +143,12 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
       </Pressable>
 
       <Modal visible={editing} animationType="fade" transparent onRequestClose={handleClose}>
-        <View style={styles.noteModalOuter}>
+        <ScrollView
+          scrollEnabled={false}
+          keyboardShouldPersistTaps="always"
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.noteModalOuter}
+        >
           <Pressable style={styles.noteModalBackdrop} onPress={handleClose} />
           <View
             style={[styles.noteModal, {
@@ -183,24 +188,22 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
               textAlignVertical="top"
             />
 
-            <ScrollView scrollEnabled={false} keyboardShouldPersistTaps="always">
-              <View style={styles.noteModalActions}>
-                <Pressable
-                  onPressIn={handleClose}
-                  style={[styles.noteBtn, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary, borderColor: theme.separator }]}
-                >
-                  <Text style={[styles.noteBtnText, { color: theme.text, fontFamily: "Inter_500Medium" }]}>Cancel</Text>
-                </Pressable>
-                <Pressable
-                  onPressIn={handleSave}
-                  style={[styles.noteBtn, styles.noteBtnPrimary, { backgroundColor: dirty ? theme.tint : theme.tint + "66" }]}
-                >
-                  <Text style={[styles.noteBtnText, { color: "#fff", fontFamily: "Inter_600SemiBold" }]}>Save</Text>
-                </Pressable>
-              </View>
-            </ScrollView>
+            <View style={styles.noteModalActions}>
+              <Pressable
+                onPress={handleClose}
+                style={[styles.noteBtn, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary, borderColor: theme.separator }]}
+              >
+                <Text style={[styles.noteBtnText, { color: theme.text, fontFamily: "Inter_500Medium" }]}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleSave}
+                style={[styles.noteBtn, styles.noteBtnPrimary, { backgroundColor: dirty ? theme.tint : theme.tint + "66" }]}
+              >
+                <Text style={[styles.noteBtnText, { color: "#fff", fontFamily: "Inter_600SemiBold" }]}>Save</Text>
+              </Pressable>
+            </View>
           </View>
-        </View>
+        </ScrollView>
       </Modal>
     </>
   );
@@ -418,7 +421,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   noteModalOuter: {
-    flex: 1,
+    flexGrow: 1,
     flexDirection: "column",
   },
   noteModalBackdrop: {
