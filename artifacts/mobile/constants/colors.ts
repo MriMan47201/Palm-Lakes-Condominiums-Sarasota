@@ -6,11 +6,11 @@ const navyLight = "#187A97";     // Clear water blue
 
 export default {
   light: {
-    text: "#1E2624",
+    text: "#322514",
     textSecondary: "#2C6A80",
     textMuted: "#6E9BAD",
     background: "#F0FAFF",
-    backgroundSecondary: "#FAF0E6",
+    backgroundSecondary: "#FDF6EF",
     backgroundTertiary: "#DDEFFA",
     tint: accent,
     tintLight: accentLight,
@@ -18,7 +18,7 @@ export default {
     navyMid,
     navyLight,
     separator: "#B8D9E8",
-    card: "#FAF0E6",
+    card: "#FDF6EF",
     tabIconDefault: "#89B5C8",
     tabIconSelected: accent,
     success: "#10B981",
