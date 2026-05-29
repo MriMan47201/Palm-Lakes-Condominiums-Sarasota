@@ -27,8 +27,8 @@ export default function TabLayout() {
           borderTopWidth: isWeb ? 1 : 0,
           borderTopColor: theme.separator,
           elevation: 0,
-          paddingBottom: safeAreaInsets.bottom,
-          ...(isWeb ? { height: 84 } : {}),
+          paddingBottom: isWeb ? 16 : safeAreaInsets.bottom,
+          ...(isWeb ? { height: 72 } : {}),
         },
         tabBarBackground: () =>
           isIOS ? (
