@@ -183,21 +183,22 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
               textAlignVertical="top"
             />
 
-            <View style={styles.noteModalActions}>
-              <Pressable
-                onPressIn={handleClose}
-                style={[styles.noteBtn, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary, borderColor: theme.separator }]}
-              >
-                <Text style={[styles.noteBtnText, { color: theme.text, fontFamily: "Inter_500Medium" }]}>Cancel</Text>
-              </Pressable>
-              <Pressable
-                onPressIn={handleSave}
-                style={[styles.noteBtn, styles.noteBtnPrimary, { backgroundColor: dirty ? theme.tint : theme.tint + "66" }]}
-              >
-                <Feather name="save" size={14} color="#fff" />
-                <Text style={[styles.noteBtnText, { color: "#fff", fontFamily: "Inter_600SemiBold" }]}>Save</Text>
-              </Pressable>
-            </View>
+            <ScrollView scrollEnabled={false} keyboardShouldPersistTaps="always">
+              <View style={styles.noteModalActions}>
+                <Pressable
+                  onPressIn={handleClose}
+                  style={[styles.noteBtn, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary, borderColor: theme.separator }]}
+                >
+                  <Text style={[styles.noteBtnText, { color: theme.text, fontFamily: "Inter_500Medium" }]}>Cancel</Text>
+                </Pressable>
+                <Pressable
+                  onPressIn={handleSave}
+                  style={[styles.noteBtn, styles.noteBtnPrimary, { backgroundColor: dirty ? theme.tint : theme.tint + "66" }]}
+                >
+                  <Text style={[styles.noteBtnText, { color: "#fff", fontFamily: "Inter_600SemiBold" }]}>Save</Text>
+                </Pressable>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
