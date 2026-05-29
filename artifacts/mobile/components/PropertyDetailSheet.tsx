@@ -135,7 +135,11 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <Pressable style={styles.noteModalBackdrop} onPress={handleClose} />
-          <View style={[styles.noteModal, { backgroundColor: isDark ? "#0F1B2E" : "#fff", borderColor: theme.separator }]}>
+          <ScrollView
+            style={[styles.noteModal, { backgroundColor: isDark ? "#0F1B2E" : "#fff", borderColor: theme.separator }]}
+            keyboardShouldPersistTaps="handled"
+            scrollEnabled={false}
+          >
             <View style={styles.noteModalHeader}>
               <Text style={[styles.noteModalTitle, { color: theme.text, fontFamily: "Inter_700Bold" }]}>
                 Notes
@@ -182,7 +186,7 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
                 <Text style={[styles.noteBtnText, { color: "#fff", fontFamily: "Inter_600SemiBold" }]}>Save</Text>
               </Pressable>
             </View>
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
     </>
