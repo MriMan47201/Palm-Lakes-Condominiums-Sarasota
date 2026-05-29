@@ -137,7 +137,7 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
           <Pressable style={styles.noteModalBackdrop} onPress={handleClose} />
           <ScrollView
             style={[styles.noteModal, { backgroundColor: isDark ? "#0F1B2E" : "#fff", borderColor: theme.separator }]}
-            keyboardShouldPersistTaps="handled"
+            keyboardShouldPersistTaps="always"
             scrollEnabled={false}
           >
             <View style={styles.noteModalHeader}>
