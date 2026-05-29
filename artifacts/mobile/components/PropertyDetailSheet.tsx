@@ -61,16 +61,17 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
   const [draft, setDraft] = useState("");
   const [dirty, setDirty] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const closingRef = React.useRef(false);
 
   useEffect(() => {
-    if (!editing) { setKeyboardHeight(0); return; }
+    if (!editing) { closingRef.current = false; setKeyboardHeight(0); return; }
     const show = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
       (e) => setKeyboardHeight(e.endCoordinates.height)
     );
     const hide = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
-      () => setKeyboardHeight(0)
+      () => { if (!closingRef.current) setKeyboardHeight(0); }
     );
     return () => { show.remove(); hide.remove(); };
   }, [editing]);
@@ -98,6 +99,7 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
   };
 
   const handleSave = async () => {
+    closingRef.current = true;
     Keyboard.dismiss();
     await saveNote(draft);
     setDirty(false);
@@ -105,6 +107,7 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
   };
 
   const handleClose = () => {
+    closingRef.current = true;
     Keyboard.dismiss();
     setEditing(false);
   };
