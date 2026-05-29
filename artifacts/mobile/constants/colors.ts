@@ -6,7 +6,7 @@ const navyLight = "#187A97";     // Clear water blue
 
 export default {
   light: {
-    text: "#322514",
+    text: "#1E2624",
     textSecondary: "#2C6A80",
     textMuted: "#6E9BAD",
     background: "#F0FAFF",
