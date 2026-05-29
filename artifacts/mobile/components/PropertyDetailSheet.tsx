@@ -149,7 +149,7 @@ function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: an
             style={[styles.noteModal, {
               backgroundColor: isDark ? "#0F1B2E" : "#fff",
               borderColor: theme.separator,
-              bottom: keyboardHeight + 16,
+              marginBottom: keyboardHeight + 16,
             }]}
           >
             <View style={styles.noteModalHeader}>
@@ -418,15 +418,15 @@ const styles = StyleSheet.create({
   },
   noteModalOuter: {
     flex: 1,
+    flexDirection: "column",
   },
   noteModalBackdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.45)",
   },
   noteModal: {
-    position: "absolute",
-    left: 20,
-    right: 20,
+    marginTop: "auto",
+    marginHorizontal: 20,
     borderRadius: 20,
     borderWidth: 1,
     padding: 24,

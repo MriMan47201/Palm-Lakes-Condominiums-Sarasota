@@ -195,7 +195,7 @@ export default function DirectoryScreen() {
                 Sarasota, FL 34243{syncInfo?.count ? ` · ${syncInfo.count} units` : ""}
               </Text>
               <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.80)", fontFamily: "Inter_400Regular" }]}>
-                v1.0
+                v1.1
               </Text>
             </View>
           </View>
