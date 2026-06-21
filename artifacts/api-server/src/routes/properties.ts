@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { propertiesTable, syncLogTable } from "@workspace/db";
-import { ilike, or, desc, count } from "drizzle-orm";
+import { ilike, or, desc, count, ne } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { doSync, shouldSync } from "../lib/sync";
 
@@ -130,7 +130,8 @@ router.get("/properties/last-sync", async (req, res) => {
       .orderBy(desc(syncLogTable.syncedAt))
       .limit(1);
 
-    const propertyCount = await db.select({ count: count() }).from(propertiesTable);
+    const propertyCount = await db.select({ count: count() }).from(propertiesTable)
+      .where(ne(propertiesTable.parcelId, "2029601009"));
 
     const lastSyncAt = lastSync[0]?.syncedAt?.toISOString() ?? null;
     let nextSyncAt: string | null = null;
