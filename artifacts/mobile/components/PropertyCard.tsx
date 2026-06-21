@@ -16,6 +16,7 @@ type Props = {
   property: Property;
   onPress?: (property: Property) => void;
   searchQuery?: string;
+  showUnit?: boolean;
 };
 
 function highlightText(text: string, query: string, style: object, highlightStyle: object) {
@@ -36,7 +37,7 @@ function highlightText(text: string, query: string, style: object, highlightStyl
   );
 }
 
-export default function PropertyCard({ property, onPress, searchQuery = "" }: Props) {
+export default function PropertyCard({ property, onPress, searchQuery = "", showUnit = false }: Props) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const theme = Colors[isDark ? "dark" : "light"];
@@ -101,6 +102,11 @@ export default function PropertyCard({ property, onPress, searchQuery = "" }: Pr
             [styles.ownerName, { color: theme.text, fontFamily: "Inter_500Medium" }],
             { backgroundColor: theme.tint + "44", borderRadius: 2 }
           )}
+          {showUnit && property.lotNumber ? (
+            <Text style={[styles.unitNumber, { fontFamily: "Inter_700Bold" }]}>
+              {property.lotNumber}
+            </Text>
+          ) : null}
         </View>
 
         {(property.totalValue || property.landValue) ? (
@@ -192,6 +198,11 @@ const styles = StyleSheet.create({
   ownerName: {
     fontSize: 14,
     flex: 1,
+  },
+  unitNumber: {
+    fontSize: 14,
+    color: "#CC2222",
+    textAlign: "right",
   },
   valueRow: {
     flexDirection: "row",

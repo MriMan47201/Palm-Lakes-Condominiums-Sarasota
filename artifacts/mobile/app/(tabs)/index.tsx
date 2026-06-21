@@ -5,6 +5,7 @@ import { useFocusEffect, useNavigation } from "expo-router";
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import {
   ActivityIndicator,
+  Animated,
   FlatList,
   ImageBackground,
   Platform,
@@ -16,6 +17,7 @@ import {
   RefreshControl,
   Alert,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -29,10 +31,11 @@ import { useAllNotes } from "@/hooks/useNotes";
 const ENTRANCE_IMAGE = require("../../assets/images/main-entrance.jpg");
 
 const SUBDIVISION_NAME = "Palm Lakes Condominiums";
+const SORT_STORAGE_KEY = "plc_sort_mode_v2";
 
-type SortMode = "number" | "street";
+export type SortMode = "street1" | "street2" | "number" | "unit";
 
-const STREET_ORDER = [
+const STREET1_ORDER = [
   "31ST ST E",
   "32ND ST E",
   "33RD ST E",
@@ -41,22 +44,46 @@ const STREET_ORDER = [
   "79TH AVE E",
 ];
 
+const STREET2_ORDER = [
+  "77TH DR E",
+  "78TH AVE E",
+  "79TH AVE E",
+  "31ST ST E",
+  "32ND ST E",
+  "33RD ST E",
+];
+
 function getStreetName(address: string): string {
   return address.replace(/^\d+\s+/, "").toUpperCase().trim();
 }
 
-function sortByStreet(a: Property, b: Property): number {
-  const streetA = getStreetName(a.address);
-  const streetB = getStreetName(b.address);
-  const idxA = STREET_ORDER.indexOf(streetA);
-  const idxB = STREET_ORDER.indexOf(streetB);
-  const orderA = idxA === -1 ? 999 : idxA;
-  const orderB = idxB === -1 ? 999 : idxB;
-  if (orderA !== orderB) return orderA - orderB;
-  // Within same street: sort by house number numerically
-  const numA = parseInt(a.address, 10) || 0;
-  const numB = parseInt(b.address, 10) || 0;
-  return numA - numB;
+function makeSortByStreet(order: string[]) {
+  return (a: Property, b: Property): number => {
+    const streetA = getStreetName(a.address);
+    const streetB = getStreetName(b.address);
+    const idxA = order.indexOf(streetA);
+    const idxB = order.indexOf(streetB);
+    const oA = idxA === -1 ? 999 : idxA;
+    const oB = idxB === -1 ? 999 : idxB;
+    if (oA !== oB) return oA - oB;
+    const numA = parseInt(a.address, 10) || 0;
+    const numB = parseInt(b.address, 10) || 0;
+    return numA - numB;
+  };
+}
+
+const sortByStreet1 = makeSortByStreet(STREET1_ORDER);
+const sortByStreet2 = makeSortByStreet(STREET2_ORDER);
+
+function sortByUnit(a: Property, b: Property): number {
+  const numA = parseInt(a.lotNumber ?? "", 10);
+  const numB = parseInt(b.lotNumber ?? "", 10);
+  const vA = !isNaN(numA);
+  const vB = !isNaN(numB);
+  if (vA && vB) return numA - numB;
+  if (vA) return -1;
+  if (vB) return 1;
+  return 0;
 }
 
 function resetViewportZoom() {
@@ -68,6 +95,13 @@ function resetViewportZoom() {
     viewport.setAttribute("content", "width=device-width, initial-scale=1");
   }, 50);
 }
+
+const SORT_OPTIONS: { mode: SortMode; icon: string; label: string; sub: string }[] = [
+  { mode: "street1", icon: "align-left",  label: "Street 1", sub: "31st · 32nd · 33rd · 77th · 78th · 79th" },
+  { mode: "street2", icon: "align-left",  label: "Street 2", sub: "77th · 78th · 79th · 31st · 32nd · 33rd" },
+  { mode: "number",  icon: "hash",        label: "Number",   sub: "By house number" },
+  { mode: "unit",    icon: "grid",        label: "Unit",     sub: "By unit number" },
+];
 
 export default function DirectoryScreen() {
   const colorScheme = useColorScheme();
@@ -83,9 +117,6 @@ export default function DirectoryScreen() {
   useScrollToTop(listRef);
   const navigation = useNavigation();
 
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-
   useEffect(() => {
     const unsubscribe = navigation.addListener("tabPress" as never, () => {
       setSearch("");
@@ -99,23 +130,54 @@ export default function DirectoryScreen() {
     return unsubscribe;
   }, [navigation]);
 
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [sortMode, setSortMode] = useState<SortMode>("street");
+  const [sortMode, setSortMode] = useState<SortMode>("street1");
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  const menuAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    AsyncStorage.getItem(SORT_STORAGE_KEY).then((val) => {
+      if (val && ["street1", "street2", "number", "unit"].includes(val)) {
+        setSortMode(val as SortMode);
+      }
+    });
+  }, []);
+
+  const openMenu = useCallback(() => {
+    setMenuVisible(true);
+    Animated.timing(menuAnim, {
+      toValue: 1,
+      duration: 260,
+      useNativeDriver: Platform.OS !== "web",
+    }).start();
+  }, [menuAnim]);
+
+  const closeMenu = useCallback(() => {
+    Animated.timing(menuAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: Platform.OS !== "web",
+    }).start(() => setMenuVisible(false));
+  }, [menuAnim]);
+
+  const changeSortMode = useCallback((mode: SortMode) => {
+    setSortMode(mode);
+    AsyncStorage.setItem(SORT_STORAGE_KEY, mode);
+    closeMenu();
+  }, [closeMenu]);
 
   const searchTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const handleSearchChange = useCallback((text: string) => {
     setSearch(text);
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(() => setDebouncedSearch(text), 300);
   }, []);
 
-  const { data, isLoading, refetch } = useProperties({
-    page: 1,
-    limit: 500,
-  });
-
+  const { data, isLoading, refetch } = useProperties({ page: 1, limit: 500 });
   const { data: syncInfo, refetch: refetchSync } = useSyncInfo();
   const syncMutation = useSyncProperties();
   const { notes: allNotes, reload: reloadNotes } = useAllNotes();
@@ -139,10 +201,12 @@ export default function DirectoryScreen() {
   const total = filteredProperties.length;
 
   const sortedProperties = useMemo(() => {
-    if (sortMode === "street") {
-      return [...filteredProperties].sort(sortByStreet);
+    switch (sortMode) {
+      case "street1": return [...filteredProperties].sort(sortByStreet1);
+      case "street2": return [...filteredProperties].sort(sortByStreet2);
+      case "unit":    return [...filteredProperties].sort(sortByUnit);
+      default:        return filteredProperties;
     }
-    return filteredProperties;
   }, [filteredProperties, sortMode]);
 
   const handleRefresh = useCallback(async () => {
@@ -216,49 +280,15 @@ export default function DirectoryScreen() {
         />
       </View>
 
-      {!isLoading && (
+      {!isLoading && debouncedSearch ? (
         <View style={styles.resultsRow}>
-          {debouncedSearch ? (
-            <Text style={[styles.resultsText, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
-              {`${total} result${total !== 1 ? "s" : ""} for "${debouncedSearch}"`}
-            </Text>
-          ) : <View />}
-          <View style={[styles.sortToggle, { backgroundColor: isDark ? theme.backgroundTertiary : theme.backgroundTertiary, borderColor: theme.separator }]}>
-            <Pressable
-              onPress={() => setSortMode("street")}
-              style={[
-                styles.sortPill,
-                sortMode === "street" && { backgroundColor: theme.tint },
-              ]}
-            >
-              <Feather name="align-left" size={11} color={sortMode === "street" ? "#fff" : theme.textMuted} />
-              <Text style={[
-                styles.sortPillText,
-                { color: sortMode === "street" ? "#fff" : theme.textMuted, fontFamily: "Inter_500Medium" },
-              ]}>
-                Street
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setSortMode("number")}
-              style={[
-                styles.sortPill,
-                sortMode === "number" && { backgroundColor: theme.tint },
-              ]}
-            >
-              <Feather name="hash" size={11} color={sortMode === "number" ? "#fff" : theme.textMuted} />
-              <Text style={[
-                styles.sortPillText,
-                { color: sortMode === "number" ? "#fff" : theme.textMuted, fontFamily: "Inter_500Medium" },
-              ]}>
-                Number
-              </Text>
-            </Pressable>
-          </View>
+          <Text style={[styles.resultsText, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+            {`${total} result${total !== 1 ? "s" : ""} for "${debouncedSearch}"`}
+          </Text>
         </View>
-      )}
+      ) : null}
     </View>
-  ), [isDark, theme, syncInfo, syncMutation.isPending, search, debouncedSearch, total, isLoading, handleSync, handleSearchChange, sortMode, insets]);
+  ), [isDark, theme, syncInfo, syncMutation.isPending, search, debouncedSearch, total, isLoading, handleSync, handleSearchChange, insets]);
 
   const renderItem = useCallback(
     ({ item }: { item: Property }) => (
@@ -266,9 +296,10 @@ export default function DirectoryScreen() {
         property={item}
         onPress={setSelectedProperty}
         searchQuery={debouncedSearch}
+        showUnit={sortMode === "unit"}
       />
     ),
-    [debouncedSearch]
+    [debouncedSearch, sortMode]
   );
 
   const EmptyState = useCallback(() => {
@@ -282,7 +313,6 @@ export default function DirectoryScreen() {
         </View>
       );
     }
-
     if (debouncedSearch) {
       return (
         <View style={styles.centered}>
@@ -296,7 +326,6 @@ export default function DirectoryScreen() {
         </View>
       );
     }
-
     return (
       <View style={styles.centered}>
         <Feather name="home" size={48} color={theme.textMuted} />
@@ -309,6 +338,17 @@ export default function DirectoryScreen() {
       </View>
     );
   }, [isLoading, debouncedSearch, theme]);
+
+  const panelTranslate = menuAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [300, 0],
+  });
+  const backdropOpacity = menuAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+
+  const sortLabel = SORT_OPTIONS.find((o) => o.mode === sortMode)?.label ?? "Sort";
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -334,11 +374,102 @@ export default function DirectoryScreen() {
         keyboardShouldPersistTaps="handled"
       />
 
+      <Pressable
+        onPress={openMenu}
+        style={[styles.hamburgerBtn, { top: insets.top + 10 }]}
+      >
+        <View style={styles.hamburgerInner}>
+          <Feather name="menu" size={20} color="#fff" />
+          <Text style={styles.hamburgerLabel}>{sortLabel}</Text>
+        </View>
+      </Pressable>
+
       <PropertyDetailSheet
         property={selectedProperty}
         visible={!!selectedProperty}
         onClose={() => { setSelectedProperty(null); reloadNotes(); resetViewportZoom(); }}
       />
+
+      {menuVisible && (
+        <View style={[StyleSheet.absoluteFillObject, { pointerEvents: "box-none" } as any]}>
+          <Animated.View
+            style={[StyleSheet.absoluteFillObject, { opacity: backdropOpacity }]}
+          >
+            <Pressable style={StyleSheet.absoluteFillObject} onPress={closeMenu}>
+              <View style={[StyleSheet.absoluteFillObject, styles.menuBackdrop]} />
+            </Pressable>
+          </Animated.View>
+
+          <Animated.View
+            style={[
+              styles.menuPanel,
+              {
+                backgroundColor: isDark ? theme.backgroundSecondary : "#FFFAF4",
+                borderLeftColor: theme.separator,
+                paddingTop: insets.top + 16,
+                paddingBottom: insets.bottom + 24,
+              },
+              { transform: [{ translateX: panelTranslate }] },
+            ]}
+          >
+            <View style={styles.menuHeader}>
+              <Text style={[styles.menuTitle, { color: theme.text, fontFamily: "Inter_700Bold" }]}>
+                Sort By
+              </Text>
+              <Pressable onPress={closeMenu} style={styles.menuClose} hitSlop={10}>
+                <Feather name="x" size={22} color={theme.textMuted} />
+              </Pressable>
+            </View>
+
+            <View style={[styles.menuDivider, { backgroundColor: theme.separator }]} />
+
+            <View style={styles.menuOptions}>
+              {SORT_OPTIONS.map((opt) => {
+                const active = sortMode === opt.mode;
+                return (
+                  <Pressable
+                    key={opt.mode}
+                    onPress={() => changeSortMode(opt.mode)}
+                    style={({ pressed }) => [
+                      styles.menuOption,
+                      {
+                        backgroundColor: active
+                          ? theme.tint + "18"
+                          : pressed
+                          ? theme.backgroundTertiary
+                          : "transparent",
+                        borderColor: active ? theme.tint + "55" : "transparent",
+                      },
+                    ]}
+                  >
+                    <View style={[styles.menuOptionIcon, { backgroundColor: active ? theme.tint : theme.backgroundTertiary }]}>
+                      <Feather
+                        name={opt.icon as any}
+                        size={14}
+                        color={active ? "#fff" : theme.textMuted}
+                      />
+                    </View>
+                    <View style={styles.menuOptionText}>
+                      <Text style={[
+                        styles.menuOptionLabel,
+                        { color: active ? theme.tint : theme.text, fontFamily: active ? "Inter_700Bold" : "Inter_600SemiBold" },
+                      ]}>
+                        {opt.label}
+                      </Text>
+                      <Text style={[styles.menuOptionSub, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+                        {opt.sub}
+                      </Text>
+                    </View>
+                    {active && (
+                      <Feather name="check" size={16} color={theme.tint} />
+                    )}
+                  </Pressable>
+                );
+              })}
+            </View>
+          </Animated.View>
+        </View>
+      )}
     </View>
   );
 }
@@ -393,33 +524,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   resultsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 6,
   },
   resultsText: {
     fontSize: 13,
-  },
-  sortToggle: {
-    flexDirection: "row",
-    borderRadius: 8,
-    borderWidth: 1,
-    overflow: "hidden",
-    gap: 2,
-    padding: 2,
-  },
-  sortPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 9,
-    paddingVertical: 5,
-    borderRadius: 6,
-  },
-  sortPillText: {
-    fontSize: 12,
   },
   centered: {
     alignItems: "center",
@@ -439,5 +548,95 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     lineHeight: 20,
+  },
+  hamburgerBtn: {
+    position: "absolute",
+    right: 14,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  hamburgerInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 11,
+    paddingVertical: 7,
+    backgroundColor: "rgba(0,0,0,0.38)",
+    borderRadius: 20,
+  },
+  hamburgerLabel: {
+    color: "#fff",
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+  },
+  menuBackdrop: {
+    backgroundColor: "rgba(0,0,0,0.45)",
+  },
+  menuPanel: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    width: 290,
+    borderLeftWidth: 1,
+    ...Platform.select({
+      web: { boxShadow: "-4px 0 24px rgba(0,0,0,0.18)" } as any,
+      default: {
+        shadowColor: "#000",
+        shadowOffset: { width: -3, height: 0 },
+        shadowOpacity: 0.18,
+        shadowRadius: 12,
+        elevation: 16,
+      },
+    }),
+  },
+  menuHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 14,
+  },
+  menuTitle: {
+    fontSize: 20,
+  },
+  menuClose: {
+    padding: 4,
+  },
+  menuDivider: {
+    height: 1,
+    marginHorizontal: 20,
+    marginBottom: 12,
+  },
+  menuOptions: {
+    paddingHorizontal: 12,
+    gap: 4,
+  },
+  menuOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    paddingVertical: 13,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  menuOptionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  menuOptionText: {
+    flex: 1,
+    gap: 2,
+  },
+  menuOptionLabel: {
+    fontSize: 15,
+  },
+  menuOptionSub: {
+    fontSize: 11,
+    lineHeight: 14,
   },
 });
