@@ -3,25 +3,42 @@ import { useState, useEffect, useCallback } from "react";
 
 const NOTES_PREFIX = "plc_note_";
 
-export function useNote(parcelId: string) {
-  const key = NOTES_PREFIX + parcelId;
+export function useNote(key: string, legacyKey?: string) {
+  const storageKey = NOTES_PREFIX + key;
+  const legacyStorageKey = legacyKey ? NOTES_PREFIX + legacyKey : null;
   const [note, setNote] = useState<string>("");
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(key).then((val) => {
-      setNote(val ?? "");
+    (async () => {
+      const val = await AsyncStorage.getItem(storageKey);
+      if (val !== null) {
+        setNote(val);
+        setLoaded(true);
+        return;
+      }
+      if (legacyStorageKey) {
+        const legacyVal = await AsyncStorage.getItem(legacyStorageKey);
+        if (legacyVal !== null) {
+          await AsyncStorage.setItem(storageKey, legacyVal);
+          await AsyncStorage.removeItem(legacyStorageKey);
+          setNote(legacyVal);
+          setLoaded(true);
+          return;
+        }
+      }
+      setNote("");
       setLoaded(true);
-    });
-  }, [key]);
+    })();
+  }, [storageKey, legacyStorageKey]);
 
   const saveNote = useCallback(
     async (text: string) => {
       const trimmed = text.slice(0, 288);
-      await AsyncStorage.setItem(key, trimmed);
+      await AsyncStorage.setItem(storageKey, trimmed);
       setNote(trimmed);
     },
-    [key]
+    [storageKey]
   );
 
   return { note, saveNote, loaded };

@@ -158,6 +158,9 @@ const server = http.createServer((req, res) => {
     return serveWebFile(pathname, res);
   }
 
+  if (pathname === "/" || pathname === "") {
+    return serveLandingPage(req, res, landingPageTemplate, appName);
+  }
   serveStaticFile(pathname, res);
 });
 

@@ -75,6 +75,10 @@ function makeSortByStreet(order: string[]) {
 const sortByStreet1 = makeSortByStreet(STREET1_ORDER);
 const sortByStreet2 = makeSortByStreet(STREET2_ORDER);
 
+function sortByNumber(a: Property, b: Property): number {
+  return (parseInt(a.address, 10) || 0) - (parseInt(b.address, 10) || 0);
+}
+
 function sortByUnit(a: Property, b: Property): number {
   const numA = parseInt(a.lotNumber ?? "", 10);
   const numB = parseInt(b.lotNumber ?? "", 10);
@@ -204,6 +208,7 @@ export default function DirectoryScreen() {
     switch (sortMode) {
       case "street1": return [...filteredProperties].sort(sortByStreet1);
       case "street2": return [...filteredProperties].sort(sortByStreet2);
+      case "number":  return [...filteredProperties].sort(sortByNumber);
       case "unit":    return [...filteredProperties].sort(sortByUnit);
       default:        return filteredProperties;
     }
