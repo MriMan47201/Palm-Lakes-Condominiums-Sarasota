@@ -30,6 +30,9 @@ export default function Root({ children }: PropsWithChildren) {
 
         {/* Suppress the default body margin Expo adds on web */}
         <ScrollViewStyleReset />
+
+        {/* Phone-frame layout on tablets and desktops */}
+        <link rel="stylesheet" href="/phone-frame.css" />
       </head>
       <body>{children}</body>
     </html>

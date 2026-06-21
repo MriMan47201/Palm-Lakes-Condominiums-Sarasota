@@ -83,6 +83,8 @@ function serveLandingPage(req, res, landingPageTemplate, appName) {
   res.end(html);
 }
 
+const PHONE_FRAME_INJECT = '<link rel="stylesheet" href="/phone-frame.css" />';
+
 function serveWebFile(urlPath, res) {
   const safePath = path.normalize(urlPath).replace(/^(\.\.(\/|\\|$))+/, "");
   let filePath = path.join(WEB_ROOT, safePath);
@@ -99,6 +101,15 @@ function serveWebFile(urlPath, res) {
 
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || "application/octet-stream";
+
+  // Inject phone-frame stylesheet into the HTML shell
+  if (filePath.endsWith("index.html")) {
+    const html = fs.readFileSync(filePath, "utf-8").replace("</head>", `${PHONE_FRAME_INJECT}</head>`);
+    res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+    res.end(html);
+    return;
+  }
+
   const content = fs.readFileSync(filePath);
   res.writeHead(200, { "content-type": contentType });
   res.end(content);

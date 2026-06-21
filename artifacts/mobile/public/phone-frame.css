@@ -1,0 +1,16 @@
+@media (min-width: 520px) {
+  html, body {
+    background: #0d2029;
+    min-height: 100vh;
+  }
+  #root {
+    max-width: 430px;
+    min-height: 100vh;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.07),
+      0 12px 60px rgba(0,0,0,0.65);
+  }
+}
