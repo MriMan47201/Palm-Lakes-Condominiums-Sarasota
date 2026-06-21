@@ -114,16 +114,31 @@ export default function DirectoryScreen() {
   const theme = Colors[isDark ? "dark" : "light"];
   const insets = useSafeAreaInsets();
 
-  // On iOS: hide the hamburger while the keyboard is up, restore on keyboardDidHide
-  // or when the screen regains focus (via useFocusEffect below).
-  const [stableTop] = useState(insets.top);   // captured once on mount — never changes
-  const [kbVisible, setKbVisible] = useState(false);
+  // Only ever adopt a LARGER top inset during normal rendering —
+  // prevents any keyboard-related inset shrinkage from moving the hamburger up.
+  const maxTop = useRef(insets.top);
+  const [stableTop, setStableTop] = useState(insets.top);
+  const liveTop = useRef(insets.top);
 
   useEffect(() => {
-    if (Platform.OS !== "ios") return;
-    const willShow = Keyboard.addListener("keyboardWillShow", () => setKbVisible(true));
-    const didHide  = Keyboard.addListener("keyboardDidHide",  () => setKbVisible(false));
-    return () => { willShow.remove(); didHide.remove(); };
+    liveTop.current = insets.top;
+    if (insets.top > maxTop.current) {
+      maxTop.current = insets.top;
+      setStableTop(insets.top);
+    }
+  }, [insets.top]);
+
+  // Self-repair: once the keyboard is fully gone the OS restores the real inset.
+  // Force-read it so the hamburger button is always in the right spot after keyboard use.
+  useEffect(() => {
+    const sub = Keyboard.addListener("keyboardDidHide", () => {
+      setTimeout(() => {
+        const real = liveTop.current;
+        maxTop.current = real;
+        setStableTop(real);
+      }, 80);
+    });
+    return () => sub.remove();
   }, []);
 
   useFocusEffect(useCallback(() => {
@@ -403,16 +418,14 @@ export default function DirectoryScreen() {
         keyboardShouldPersistTaps="handled"
       />
 
-      {!kbVisible && (
-        <Pressable
-          onPress={openMenu}
-          style={[styles.hamburgerBtn, { top: stableTop + 22 }]}
-        >
-          <View style={styles.hamburgerInner}>
-            <Feather name="menu" size={24} color="#fff" />
-          </View>
-        </Pressable>
-      )}
+      <Pressable
+        onPress={openMenu}
+        style={[styles.hamburgerBtn, { top: stableTop + 22 }]}
+      >
+        <View style={styles.hamburgerInner}>
+          <Feather name="menu" size={24} color="#fff" />
+        </View>
+      </Pressable>
 
       <PropertyDetailSheet
         property={selectedProperty}
