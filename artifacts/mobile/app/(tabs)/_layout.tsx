@@ -2,8 +2,8 @@ import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { Feather } from "@expo/vector-icons";
-import React from "react";
-import { Platform, StyleSheet, View, useColorScheme } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Keyboard, Platform, StyleSheet, View, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 
@@ -14,6 +14,32 @@ export default function TabLayout() {
   const isWeb = Platform.OS === "web";
   const safeAreaInsets = useSafeAreaInsets();
   const theme = Colors[isDark ? "dark" : "light"];
+
+  // Lock the bottom inset so the tab bar height never jumps when the keyboard appears.
+  // On iOS, safeAreaInsets.bottom shrinks to 0 while the keyboard is up; we freeze
+  // the last pre-keyboard value and restore it once the keyboard fully hides.
+  const bottomInsetRef = useRef(safeAreaInsets.bottom);
+  const [stableBottom, setStableBottom] = useState(safeAreaInsets.bottom);
+  const keyboardUp = useRef(false);
+
+  useEffect(() => {
+    bottomInsetRef.current = safeAreaInsets.bottom;
+    if (!keyboardUp.current) {
+      setStableBottom(safeAreaInsets.bottom);
+    }
+  }, [safeAreaInsets.bottom]);
+
+  useEffect(() => {
+    if (!isIOS) return;
+    const willShow = Keyboard.addListener("keyboardWillShow", () => {
+      keyboardUp.current = true;
+    });
+    const willHide = Keyboard.addListener("keyboardWillHide", () => {
+      keyboardUp.current = false;
+      setStableBottom(bottomInsetRef.current);
+    });
+    return () => { willShow.remove(); willHide.remove(); };
+  }, [isIOS]);
 
   return (
     <Tabs
@@ -27,7 +53,7 @@ export default function TabLayout() {
           borderTopWidth: isWeb ? 1 : 0,
           borderTopColor: theme.separator,
           elevation: 0,
-          paddingBottom: isWeb ? 16 : safeAreaInsets.bottom,
+          paddingBottom: isWeb ? 16 : stableBottom,
           ...(isWeb ? { height: 72 } : {}),
         },
         tabBarBackground: () =>

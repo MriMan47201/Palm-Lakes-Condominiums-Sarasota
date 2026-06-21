@@ -8,6 +8,7 @@ import {
   Animated,
   FlatList,
   ImageBackground,
+  Keyboard,
   Platform,
   Pressable,
   StyleSheet,
@@ -115,6 +116,8 @@ export default function DirectoryScreen() {
 
   useFocusEffect(useCallback(() => {
     resetViewportZoom();
+    // Dismiss any lingering keyboard on focus so the tab bar restores its correct height
+    Keyboard.dismiss();
   }, []));
 
   const listRef = useRef<FlatList>(null);
