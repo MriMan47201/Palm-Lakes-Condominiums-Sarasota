@@ -485,7 +485,7 @@ export default function DirectoryScreen() {
               })}
             </View>
 
-            <View style={[styles.menuDivider, { backgroundColor: theme.separator, marginTop: 8 }]} />
+            <View style={[styles.menuSectionDivider, { backgroundColor: theme.separator }]} />
 
             <View style={styles.menuAbout}>
               <View style={[styles.menuAboutIcon, { backgroundColor: theme.backgroundTertiary }]}>
@@ -645,10 +645,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingBottom: 14,
+    paddingTop: 12,
+    paddingBottom: 10,
   },
   menuTitle: {
-    fontSize: 20,
+    fontSize: 13,
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
   },
   menuClose: {
     padding: 4,
@@ -657,6 +660,13 @@ const styles = StyleSheet.create({
     height: 1,
     marginHorizontal: 20,
     marginBottom: 12,
+  },
+  menuSectionDivider: {
+    height: 2,
+    marginHorizontal: 0,
+    marginTop: 16,
+    marginBottom: 4,
+    opacity: 0.55,
   },
   menuOptions: {
     paddingHorizontal: 12,
