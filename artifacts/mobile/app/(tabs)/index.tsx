@@ -285,6 +285,16 @@ export default function DirectoryScreen() {
         />
       </View>
 
+      <View style={[styles.sortBar, { backgroundColor: theme.tint + "18", borderColor: theme.tint + "40" }]}>
+        <Feather name="sliders" size={13} color={theme.tint} />
+        <Text style={[styles.sortBarLabel, { color: theme.textSecondary, fontFamily: "Inter_400Regular" }]}>
+          Sort:
+        </Text>
+        <Text style={[styles.sortBarValue, { color: theme.tint, fontFamily: "Inter_700Bold" }]}>
+          {SORT_OPTIONS.find((o) => o.mode === sortMode)?.label ?? ""}
+        </Text>
+      </View>
+
       {!isLoading && debouncedSearch ? (
         <View style={styles.resultsRow}>
           <Text style={[styles.resultsText, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
@@ -293,7 +303,7 @@ export default function DirectoryScreen() {
         </View>
       ) : null}
     </View>
-  ), [isDark, theme, syncInfo, syncMutation.isPending, search, debouncedSearch, total, isLoading, handleSync, handleSearchChange, insets]);
+  ), [isDark, theme, syncInfo, syncMutation.isPending, search, debouncedSearch, total, isLoading, handleSync, handleSearchChange, insets, sortMode]);
 
   const renderItem = useCallback(
     ({ item }: { item: Property }) => (
@@ -384,8 +394,7 @@ export default function DirectoryScreen() {
         style={[styles.hamburgerBtn, { top: insets.top + 10 }]}
       >
         <View style={styles.hamburgerInner}>
-          <Feather name="menu" size={20} color="#fff" />
-          <Text style={styles.hamburgerLabel}>{sortLabel}</Text>
+          <Feather name="menu" size={22} color="#fff" />
         </View>
       </Pressable>
 
@@ -563,16 +572,27 @@ const styles = StyleSheet.create({
   hamburgerInner: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 11,
-    paddingVertical: 7,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
     backgroundColor: "rgba(0,0,0,0.38)",
     borderRadius: 20,
   },
-  hamburgerLabel: {
-    color: "#fff",
-    fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
+  sortBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginHorizontal: 16,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  sortBarLabel: {
+    fontSize: 13,
+  },
+  sortBarValue: {
+    fontSize: 13,
   },
   menuBackdrop: {
     backgroundColor: "rgba(0,0,0,0.45)",
