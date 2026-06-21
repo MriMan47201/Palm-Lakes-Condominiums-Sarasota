@@ -289,7 +289,7 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
               )}
             </View>
 
-            <NotesSection propertyId={property.id.toString()} theme={theme} isDark={isDark} />
+            <NotesSection propertyId={property.address} theme={theme} isDark={isDark} />
 
             <Text style={[styles.footer, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
               Public data sourced from Manatee County GIS

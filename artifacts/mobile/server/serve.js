@@ -144,6 +144,17 @@ const server = http.createServer((req, res) => {
   }
 
   if (hasWebBuild) {
+    // Try static-build first so Expo native asset requests (bundles, assets)
+    // are still served correctly even when a web dist/ build is present.
+    const safePath = path.normalize(pathname).replace(/^(\.\.(\/|\\|$))+/, "");
+    const staticCandidate = path.join(STATIC_ROOT, safePath);
+    if (
+      staticCandidate.startsWith(STATIC_ROOT) &&
+      fs.existsSync(staticCandidate) &&
+      !fs.statSync(staticCandidate).isDirectory()
+    ) {
+      return serveStaticFile(pathname, res);
+    }
     return serveWebFile(pathname, res);
   }
 
