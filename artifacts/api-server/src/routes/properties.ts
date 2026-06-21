@@ -70,8 +70,29 @@ router.get("/properties", async (req, res) => {
   }
 });
 
+const MIN_SYNC_AGE_MS = 4 * 60 * 60 * 1000;
+
 router.post("/properties/sync", async (req, res) => {
   try {
+    const recent = await db
+      .select({ syncedAt: syncLogTable.syncedAt })
+      .from(syncLogTable)
+      .orderBy(desc(syncLogTable.syncedAt))
+      .limit(1);
+
+    if (recent.length > 0) {
+      const age = Date.now() - new Date(recent[0].syncedAt).getTime();
+      if (age < MIN_SYNC_AGE_MS) {
+        const remainingMs = MIN_SYNC_AGE_MS - age;
+        const remainingMins = Math.ceil(remainingMs / 60000);
+        return res.status(429).json({
+          success: false,
+          message: `Sync is available once every 4 hours. Try again in ${remainingMins} minute${remainingMins !== 1 ? "s" : ""}.`,
+          retryAfterMs: remainingMs,
+        });
+      }
+    }
+
     const result = await doSync();
 
     if (result.success && result.properties.length > 0) {

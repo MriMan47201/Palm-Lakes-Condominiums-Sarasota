@@ -10,6 +10,8 @@ type Props = {
   onSync: () => void;
 };
 
+const MIN_SYNC_AGE_MS = 4 * 60 * 60 * 1000;
+
 function formatTimeAgo(isoDate: string | null): string {
   if (!isoDate) return "Never";
   const diff = Date.now() - new Date(isoDate).getTime();
@@ -22,13 +24,28 @@ function formatTimeAgo(isoDate: string | null): string {
   return `${days}d ago`;
 }
 
+function formatCooldownRemaining(isoDate: string): string {
+  const elapsed = Date.now() - new Date(isoDate).getTime();
+  const remaining = Math.max(0, MIN_SYNC_AGE_MS - elapsed);
+  const h = Math.floor(remaining / (1000 * 60 * 60));
+  const m = Math.ceil((remaining % (1000 * 60 * 60)) / (1000 * 60));
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
 export default function SyncStatus({ syncInfo, isSyncing, onSync }: Props) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const theme = Colors[isDark ? "dark" : "light"];
 
-  const lastSyncText = formatTimeAgo(syncInfo?.lastSyncAt ?? null);
+  const lastSyncAt = syncInfo?.lastSyncAt ?? null;
+  const lastSyncText = formatTimeAgo(lastSyncAt);
   const count = syncInfo?.count ?? 0;
+
+  const tooRecent = lastSyncAt
+    ? Date.now() - new Date(lastSyncAt).getTime() < MIN_SYNC_AGE_MS
+    : false;
+  const syncDisabled = isSyncing || tooRecent;
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? theme.navyMid : theme.backgroundSecondary, borderColor: theme.separator }]}>
@@ -40,24 +57,30 @@ export default function SyncStatus({ syncInfo, isSyncing, onSync }: Props) {
           </Text>
           <Text style={[styles.syncText, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
             Updated {lastSyncText}
+            {tooRecent && lastSyncAt ? `  ·  available in ${formatCooldownRemaining(lastSyncAt)}` : ""}
           </Text>
         </View>
       </View>
 
       <Pressable
-        onPress={onSync}
-        disabled={isSyncing}
+        onPress={syncDisabled ? undefined : onSync}
+        disabled={syncDisabled}
         style={({ pressed }) => [
           styles.syncBtn,
-          { backgroundColor: theme.tint + (pressed ? "CC" : "FF"), opacity: isSyncing ? 0.6 : 1 },
+          {
+            backgroundColor: syncDisabled
+              ? (isDark ? theme.backgroundTertiary : "#C8D8DC")
+              : theme.tint + (pressed ? "CC" : "FF"),
+            opacity: isSyncing ? 0.7 : 1,
+          },
         ]}
       >
         {isSyncing ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
-          <Feather name="refresh-cw" size={14} color="#fff" />
+          <Feather name="refresh-cw" size={14} color={syncDisabled ? theme.textMuted : "#fff"} />
         )}
-        <Text style={[styles.syncBtnText, { fontFamily: "Inter_600SemiBold" }]}>
+        <Text style={[styles.syncBtnText, { fontFamily: "Inter_600SemiBold", color: syncDisabled ? theme.textMuted : "#fff" }]}>
           {isSyncing ? "Syncing..." : "Sync Now"}
         </Text>
       </Pressable>
