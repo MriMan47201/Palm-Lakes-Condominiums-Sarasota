@@ -394,10 +394,10 @@ export default function DirectoryScreen() {
 
       <Pressable
         onPress={openMenu}
-        style={[styles.hamburgerBtn, { top: insets.top + 10 }]}
+        style={[styles.hamburgerBtn, { top: insets.top + 22 }]}
       >
         <View style={styles.hamburgerInner}>
-          <Feather name="menu" size={22} color="#fff" />
+          <Feather name="menu" size={24} color="#fff" />
         </View>
       </Pressable>
 
@@ -429,16 +429,18 @@ export default function DirectoryScreen() {
               { transform: [{ translateX: panelTranslate }] },
             ]}
           >
-            <View style={styles.menuHeader}>
-              <Text style={[styles.menuTitle, { color: theme.text, fontFamily: "Inter_700Bold" }]}>
-                Sort By
-              </Text>
-              <Pressable onPress={closeMenu} style={styles.menuClose} hitSlop={10}>
+            {/* Close row */}
+            <View style={styles.menuCloseRow}>
+              <Pressable onPress={closeMenu} style={styles.menuClose} hitSlop={12}>
                 <Feather name="x" size={22} color={theme.textMuted} />
               </Pressable>
             </View>
 
+            {/* ── SORT BY section ── */}
             <View style={[styles.menuDivider, { backgroundColor: theme.separator }]} />
+            <Text style={[styles.menuSectionLabel, { color: theme.tint, fontFamily: "Inter_700Bold" }]}>
+              Sort By
+            </Text>
 
             <View style={styles.menuOptions}>
               {SORT_OPTIONS.map((opt) => {
@@ -485,26 +487,22 @@ export default function DirectoryScreen() {
               })}
             </View>
 
+            {/* ── ABOUT section ── */}
             <View style={[styles.menuSectionDivider, { backgroundColor: theme.separator }]} />
+            <Text style={[styles.menuSectionLabel, { color: theme.tint, fontFamily: "Inter_700Bold" }]}>
+              About
+            </Text>
 
             <View style={styles.menuAbout}>
-              <View style={[styles.menuAboutIcon, { backgroundColor: theme.backgroundTertiary }]}>
-                <Feather name="info" size={14} color={theme.textMuted} />
-              </View>
-              <View style={styles.menuAboutText}>
-                <Text style={[styles.menuAboutTitle, { color: theme.text, fontFamily: "Inter_700Bold" }]}>
-                  About
-                </Text>
-                <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
-                  Steven Low
-                </Text>
-                <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
-                  © 2026
-                </Text>
-                <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
-                  Public data sourced from{"\n"}Manatee County GIS
-                </Text>
-              </View>
+              <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+                Steven Low
+              </Text>
+              <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+                © 2026
+              </Text>
+              <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+                Public data sourced from Manatee County GIS
+              </Text>
             </View>
           </Animated.View>
         </View>
@@ -591,16 +589,16 @@ const styles = StyleSheet.create({
   hamburgerBtn: {
     position: "absolute",
     right: 14,
-    borderRadius: 20,
+    borderRadius: 24,
     overflow: "hidden",
   },
   hamburgerInner: {
-    flexDirection: "row",
+    width: 48,
+    height: 48,
     alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    backgroundColor: "rgba(0,0,0,0.38)",
-    borderRadius: 20,
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.45)",
+    borderRadius: 24,
   },
   sortBar: {
     flexDirection: "row",
@@ -640,33 +638,30 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  menuHeader: {
+  menuCloseRow: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 10,
-  },
-  menuTitle: {
-    fontSize: 13,
-    letterSpacing: 0.6,
-    textTransform: "uppercase",
+    justifyContent: "flex-end",
+    paddingHorizontal: 16,
+    paddingBottom: 8,
   },
   menuClose: {
-    padding: 4,
+    padding: 6,
+  },
+  menuSectionLabel: {
+    fontSize: 16,
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    paddingBottom: 8,
   },
   menuDivider: {
     height: 1,
     marginHorizontal: 20,
-    marginBottom: 12,
   },
   menuSectionDivider: {
     height: 2,
     marginHorizontal: 0,
     marginTop: 16,
-    marginBottom: 4,
-    opacity: 0.55,
+    opacity: 0.45,
   },
   menuOptions: {
     paddingHorizontal: 12,
@@ -700,30 +695,13 @@ const styles = StyleSheet.create({
     lineHeight: 14,
   },
   menuAbout: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 14,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-  },
-  menuAboutIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 2,
-  },
-  menuAboutText: {
-    flex: 1,
-    gap: 3,
-  },
-  menuAboutTitle: {
-    fontSize: 13,
-    marginBottom: 4,
+    paddingHorizontal: 20,
+    paddingTop: 4,
+    paddingBottom: 16,
+    gap: 5,
   },
   menuAboutLine: {
-    fontSize: 12,
-    lineHeight: 17,
+    fontSize: 13,
+    lineHeight: 19,
   },
 });
