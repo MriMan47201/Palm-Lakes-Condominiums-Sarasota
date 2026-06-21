@@ -57,7 +57,6 @@ export default function SyncStatus({ syncInfo, isSyncing, onSync }: Props) {
           </Text>
           <Text style={[styles.syncText, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
             Updated {lastSyncText}
-            {tooRecent && lastSyncAt ? `  ·  available in ${formatCooldownRemaining(lastSyncAt)}` : ""}
           </Text>
         </View>
       </View>
@@ -67,20 +66,15 @@ export default function SyncStatus({ syncInfo, isSyncing, onSync }: Props) {
         disabled={syncDisabled}
         style={({ pressed }) => [
           styles.syncBtn,
-          {
-            backgroundColor: syncDisabled
-              ? (isDark ? theme.backgroundTertiary : "#C8D8DC")
-              : theme.tint + (pressed ? "CC" : "FF"),
-            opacity: isSyncing ? 0.7 : 1,
-          },
+          { backgroundColor: theme.tint + (pressed && !syncDisabled ? "CC" : "FF"), opacity: syncDisabled ? 0.4 : 1 },
         ]}
       >
         {isSyncing ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
-          <Feather name="refresh-cw" size={14} color={syncDisabled ? theme.textMuted : "#fff"} />
+          <Feather name="refresh-cw" size={14} color="#fff" />
         )}
-        <Text style={[styles.syncBtnText, { fontFamily: "Inter_600SemiBold", color: syncDisabled ? theme.textMuted : "#fff" }]}>
+        <Text style={[styles.syncBtnText, { fontFamily: "Inter_600SemiBold" }]}>
           {isSyncing ? "Syncing..." : "Sync Now"}
         </Text>
       </Pressable>
