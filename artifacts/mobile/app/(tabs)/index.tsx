@@ -188,7 +188,7 @@ export default function DirectoryScreen() {
               </Text>
             </View>
             <Text style={[styles.headerTitle, { color: "#FFFFFF", fontFamily: "Inter_700Bold" }]}>
-              Resident Directory
+              Owner Directory
             </Text>
             <View style={styles.headerSubtitleRow}>
               <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.80)", fontFamily: "Inter_400Regular" }]}>
