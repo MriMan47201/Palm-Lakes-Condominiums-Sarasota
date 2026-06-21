@@ -78,12 +78,19 @@ export default function PropertyCard({ property, onPress, searchQuery = "", show
             </Text>
           </View>
           <View style={styles.addressInfo}>
-            {highlightText(
-              streetName,
-              searchQuery,
-              [styles.streetName, { color: theme.text, fontFamily: "Inter_600SemiBold" }],
-              { backgroundColor: theme.tint + "44", borderRadius: 2 }
-            )}
+            <View style={styles.streetNameRow}>
+              {highlightText(
+                streetName,
+                searchQuery,
+                [styles.streetName, { color: theme.text, fontFamily: "Inter_600SemiBold" }],
+                { backgroundColor: theme.tint + "44", borderRadius: 2 }
+              )}
+              {showUnit && property.lotNumber ? (
+                <Text style={[styles.unitNumber, { fontFamily: "Inter_700Bold" }]}>
+                  {property.lotNumber}
+                </Text>
+              ) : null}
+            </View>
             <Text style={[styles.cityState, { color: theme.textSecondary, fontFamily: "Inter_400Regular" }]}>
               {[property.city, property.state, property.zipCode].filter(Boolean).join(", ") || "Sarasota, FL 34243"}
             </Text>
@@ -102,11 +109,6 @@ export default function PropertyCard({ property, onPress, searchQuery = "", show
             [styles.ownerName, { color: theme.text, fontFamily: "Inter_500Medium" }],
             { backgroundColor: theme.tint + "44", borderRadius: 2 }
           )}
-          {showUnit && property.lotNumber ? (
-            <Text style={[styles.unitNumber, { fontFamily: "Inter_700Bold" }]}>
-              {property.lotNumber}
-            </Text>
-          ) : null}
         </View>
 
         {(property.totalValue || property.landValue) ? (
@@ -174,8 +176,14 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
+  streetNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   streetName: {
     fontSize: 15,
+    flex: 1,
   },
   cityState: {
     fontSize: 12,
