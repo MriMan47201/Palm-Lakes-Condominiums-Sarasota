@@ -36,7 +36,7 @@ export default function SyncStatus({ syncInfo, isSyncing, onSync }: Props) {
         <View style={[styles.dot, { backgroundColor: count > 0 ? theme.success : theme.textMuted }]} />
         <View>
           <Text style={[styles.countText, { color: theme.text, fontFamily: "Inter_600SemiBold" }]}>
-            {count > 0 ? `${count} properties` : "No data loaded"}
+            {count > 0 ? "114 units" : "No data loaded"}
           </Text>
           <Text style={[styles.syncText, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
             Updated {lastSyncText}

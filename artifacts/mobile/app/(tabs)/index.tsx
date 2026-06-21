@@ -192,7 +192,7 @@ export default function DirectoryScreen() {
             </Text>
             <View style={styles.headerSubtitleRow}>
               <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.80)", fontFamily: "Inter_400Regular" }]}>
-                Sarasota, FL 34243{syncInfo?.count ? ` · ${syncInfo.count} units` : ""}
+                Sarasota, FL 34243
               </Text>
               <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.80)", fontFamily: "Inter_400Regular" }]}>
                 v1.0
@@ -218,9 +218,11 @@ export default function DirectoryScreen() {
 
       {!isLoading && (
         <View style={styles.resultsRow}>
-          <Text style={[styles.resultsText, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
-            {debouncedSearch ? `${total} result${total !== 1 ? "s" : ""} for "${debouncedSearch}"` : `${total} properties`}
-          </Text>
+          {debouncedSearch ? (
+            <Text style={[styles.resultsText, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+              {`${total} result${total !== 1 ? "s" : ""} for "${debouncedSearch}"`}
+            </Text>
+          ) : <View />}
           <View style={[styles.sortToggle, { backgroundColor: isDark ? theme.backgroundTertiary : theme.backgroundTertiary, borderColor: theme.separator }]}>
             <Pressable
               onPress={() => setSortMode("street")}
