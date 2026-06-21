@@ -126,13 +126,13 @@ export default function DirectoryScreen() {
     if (!debouncedSearch) return allProperties;
     const q = debouncedSearch.toLowerCase().trim();
     if (q === "notes") {
-      return allProperties.filter((p) => !!allNotes[p.parcelId]);
+      return allProperties.filter((p) => !!allNotes[p.id.toString()]);
     }
     return allProperties.filter(
       (p) =>
         p.address.toLowerCase().includes(q) ||
         (p.ownerName && p.ownerName.toLowerCase().includes(q)) ||
-        (allNotes[p.parcelId] && allNotes[p.parcelId].toLowerCase().includes(q))
+        (allNotes[p.id.toString()] && allNotes[p.id.toString()].toLowerCase().includes(q))
     );
   }, [allProperties, debouncedSearch, allNotes]);
 

@@ -55,8 +55,8 @@ function DetailRow({ label, value, icon }: { label: string; value: string | null
   );
 }
 
-function NotesSection({ parcelId, theme, isDark }: { parcelId: string; theme: any; isDark: boolean }) {
-  const { note, saveNote, loaded } = useNote(parcelId);
+function NotesSection({ propertyId, theme, isDark }: { propertyId: string; theme: any; isDark: boolean }) {
+  const { note, saveNote, loaded } = useNote(propertyId);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [dirty, setDirty] = useState(false);
@@ -289,7 +289,7 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
               )}
             </View>
 
-            <NotesSection parcelId={property.parcelId} theme={theme} isDark={isDark} />
+            <NotesSection propertyId={property.id.toString()} theme={theme} isDark={isDark} />
 
             <Text style={[styles.footer, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
               Public data sourced from Manatee County GIS
