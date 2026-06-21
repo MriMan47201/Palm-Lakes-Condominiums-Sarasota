@@ -114,9 +114,20 @@ export default function DirectoryScreen() {
   const theme = Colors[isDark ? "dark" : "light"];
   const insets = useSafeAreaInsets();
 
+  // Only ever adopt a LARGER top inset — never a smaller one.
+  // On some iOS devices the safe-area top shrinks after keyboard use,
+  // which would move the hamburger button upward. We lock it at its peak.
+  const maxTop = useRef(insets.top);
+  const [stableTop, setStableTop] = useState(insets.top);
+  useEffect(() => {
+    if (insets.top > maxTop.current) {
+      maxTop.current = insets.top;
+      setStableTop(insets.top);
+    }
+  }, [insets.top]);
+
   useFocusEffect(useCallback(() => {
     resetViewportZoom();
-    // Dismiss any lingering keyboard on focus so the tab bar restores its correct height
     Keyboard.dismiss();
   }, []));
 
@@ -250,7 +261,7 @@ export default function DirectoryScreen() {
         <LinearGradient
           colors={["transparent", "rgba(7,59,76,0.55)", "rgba(7,59,76,0.88)"]}
           locations={[0.0, 0.5, 1.0]}
-          style={[styles.headerOverlay, { paddingTop: insets.top + 24 }]}
+          style={[styles.headerOverlay, { paddingTop: stableTop + 24 }]}
         >
           <View style={styles.headerContent}>
             <View style={styles.headerTop}>
@@ -394,7 +405,7 @@ export default function DirectoryScreen() {
 
       <Pressable
         onPress={openMenu}
-        style={[styles.hamburgerBtn, { top: insets.top + 22 }]}
+        style={[styles.hamburgerBtn, { top: stableTop + 22 }]}
       >
         <View style={styles.hamburgerInner}>
           <Feather name="menu" size={24} color="#fff" />
@@ -423,7 +434,7 @@ export default function DirectoryScreen() {
               {
                 backgroundColor: isDark ? theme.backgroundSecondary : "#FFFAF4",
                 borderLeftColor: theme.separator,
-                paddingTop: insets.top + 16,
+                paddingTop: stableTop + 16,
                 paddingBottom: insets.bottom + 24,
               },
               { transform: [{ translateX: panelTranslate }] },
