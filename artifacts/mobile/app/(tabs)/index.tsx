@@ -114,17 +114,32 @@ export default function DirectoryScreen() {
   const theme = Colors[isDark ? "dark" : "light"];
   const insets = useSafeAreaInsets();
 
-  // Only ever adopt a LARGER top inset — never a smaller one.
-  // On some iOS devices the safe-area top shrinks after keyboard use,
-  // which would move the hamburger button upward. We lock it at its peak.
+  // Only ever adopt a LARGER top inset during normal rendering —
+  // prevents any keyboard-related inset shrinkage from moving the hamburger up.
   const maxTop = useRef(insets.top);
   const [stableTop, setStableTop] = useState(insets.top);
+  const liveTop = useRef(insets.top);
+
   useEffect(() => {
+    liveTop.current = insets.top;
     if (insets.top > maxTop.current) {
       maxTop.current = insets.top;
       setStableTop(insets.top);
     }
   }, [insets.top]);
+
+  // Self-repair: once the keyboard is fully gone the OS restores the real inset.
+  // Force-read it so the hamburger button is always in the right spot after keyboard use.
+  useEffect(() => {
+    const sub = Keyboard.addListener("keyboardDidHide", () => {
+      setTimeout(() => {
+        const real = liveTop.current;
+        maxTop.current = real;
+        setStableTop(real);
+      }, 80);
+    });
+    return () => sub.remove();
+  }, []);
 
   useFocusEffect(useCallback(() => {
     resetViewportZoom();

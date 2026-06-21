@@ -86,7 +86,9 @@ function serveLandingPage(req, res, landingPageTemplate, appName) {
 const PHONE_FRAME_INJECT = '<link rel="stylesheet" href="/phone-frame.css" />';
 
 function serveWebFile(urlPath, res) {
-  const safePath = path.normalize(urlPath).replace(/^(\.\.(\/|\\|$))+/, "");
+  let decoded = urlPath;
+  try { decoded = decodeURIComponent(urlPath); } catch (_) {}
+  const safePath = path.normalize(decoded).replace(/^(\.\.(\/|\\|$))+/, "");
   let filePath = path.join(WEB_ROOT, safePath);
 
   if (!filePath.startsWith(WEB_ROOT)) {
