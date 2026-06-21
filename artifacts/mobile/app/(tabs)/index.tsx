@@ -481,6 +481,28 @@ export default function DirectoryScreen() {
                 );
               })}
             </View>
+
+            <View style={[styles.menuDivider, { backgroundColor: theme.separator, marginTop: 8 }]} />
+
+            <View style={styles.menuAbout}>
+              <View style={[styles.menuAboutIcon, { backgroundColor: theme.backgroundTertiary }]}>
+                <Feather name="info" size={14} color={theme.textMuted} />
+              </View>
+              <View style={styles.menuAboutText}>
+                <Text style={[styles.menuAboutTitle, { color: theme.text, fontFamily: "Inter_700Bold" }]}>
+                  About
+                </Text>
+                <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+                  Steven Low
+                </Text>
+                <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+                  © 2026
+                </Text>
+                <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+                  Public data sourced from{"\n"}Manatee County GIS
+                </Text>
+              </View>
+            </View>
           </Animated.View>
         </View>
       )}
@@ -663,5 +685,32 @@ const styles = StyleSheet.create({
   menuOptionSub: {
     fontSize: 11,
     lineHeight: 14,
+  },
+  menuAbout: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+  },
+  menuAboutIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
+  },
+  menuAboutText: {
+    flex: 1,
+    gap: 3,
+  },
+  menuAboutTitle: {
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  menuAboutLine: {
+    fontSize: 12,
+    lineHeight: 17,
   },
 });
