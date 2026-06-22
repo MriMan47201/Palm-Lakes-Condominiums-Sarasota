@@ -419,16 +419,14 @@ export default function DirectoryScreen() {
         keyboardShouldPersistTaps="handled"
       />
 
-      {!selectedProperty && (
-        <Pressable
-          onPress={openMenu}
-          style={[styles.hamburgerBtn, { top: stableTop + 22 }]}
-        >
-          <View style={styles.hamburgerInner}>
-            <Icon name="menu" size={24} color="#fff" />
-          </View>
-        </Pressable>
-      )}
+      <Pressable
+        onPress={openMenu}
+        style={[styles.hamburgerBtn, { top: stableTop + 22 }]}
+      >
+        <View style={styles.hamburgerInner}>
+          <Icon name="menu" size={24} color="#fff" />
+        </View>
+      </Pressable>
 
       <PropertyDetailSheet
         property={selectedProperty}

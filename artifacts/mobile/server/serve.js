@@ -104,11 +104,22 @@ function serveWebFile(urlPath, res) {
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || "application/octet-stream";
 
-  // Inject phone-frame stylesheet into the HTML shell
+  // Inject phone-frame stylesheet and viewport fix into the HTML shell
   if (filePath.endsWith("index.html")) {
-    const html = fs.readFileSync(filePath, "utf-8").replace("</head>", `${PHONE_FRAME_INJECT}</head>`);
+    const raw = fs.readFileSync(filePath, "utf-8");
+    // interactive-widget=resizes-visual: keyboard overlays content instead of
+    // resizing the layout viewport, preventing the whole app from shifting up.
+    const patched = raw
+      .replace(
+        /(<meta\s+name="viewport"\s+content="[^"]*?)(")/,
+        (_, prefix, close) =>
+          prefix.includes("interactive-widget")
+            ? prefix + close
+            : prefix + ", interactive-widget=resizes-visual" + close
+      )
+      .replace("</head>", `${PHONE_FRAME_INJECT}</head>`);
     res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-    res.end(html);
+    res.end(patched);
     return;
   }
 
