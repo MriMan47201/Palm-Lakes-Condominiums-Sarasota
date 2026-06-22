@@ -64,6 +64,24 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
 
   useEffect(() => {
     if (!editing) { closingRef.current = false; setKeyboardHeight(0); return; }
+
+    // Web: visualViewport gives the real keyboard height that RN's Keyboard API
+    // cannot provide (it always reports 0 on web). The base height is captured
+    // when editing starts (before the keyboard opens via autoFocus). When the
+    // keyboard opens, visualViewport.height shrinks by the keyboard height.
+    if (Platform.OS === "web") {
+      const vv = typeof window !== "undefined" ? (window as any).visualViewport : null;
+      if (!vv) return;
+      const baseHeight = vv.height;
+      const onResize = () => {
+        const kbH = baseHeight - vv.height;
+        setKeyboardHeight(Math.max(0, kbH));
+      };
+      vv.addEventListener("resize", onResize, { passive: true });
+      return () => vv.removeEventListener("resize", onResize);
+    }
+
+    // Native iOS / Android: use the standard Keyboard API
     const show = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
       (e) => setKeyboardHeight(e.endCoordinates.height)
