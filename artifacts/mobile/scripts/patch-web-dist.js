@@ -31,7 +31,7 @@ if (!fs.existsSync(htmlPath)) {
 let html = fs.readFileSync(htmlPath, "utf-8");
 let changed = false;
 
-// ── 0. Remove legacy height-lock script (caused header to get stuck off-screen)
+// ── 0. Remove legacy height-lock scripts (old approaches)
 const LEGACY_LOCK_RE = /<script id="vh-lock-script">[\s\S]*?<\/script>\s*/;
 if (LEGACY_LOCK_RE.test(html)) {
   html = html.replace(LEGACY_LOCK_RE, "");
@@ -61,7 +61,29 @@ if (!html.includes(KEYBOARD_FIX_MARKER)) {
   console.log("patch-web-dist: injected keyboard-stable height (100lvh) + overflow:hidden");
 }
 
-// ── 2. interactive-widget=resizes-visual ────────────────────────────────────
+// ── 2. iOS Safari keyboard height-lock script ───────────────────────────────
+// `100lvh` is defined for the URL bar, NOT the keyboard. On iOS Safari in
+// regular browser mode (not installed PWA), the keyboard still shrinks the
+// layout viewport, so `height:100%` chains (html→body→#root) all shrink and
+// everything shifts upward.
+//
+// Fix: capture window.innerHeight at load time on iOS only and lock
+// html/body/root to that pixel value. A resize listener updates the lock only
+// for URL-bar changes (~50 px) and ignores keyboard open/close (~290 px).
+// Chrome/Android is unaffected (interactive-widget handles it instead).
+const IOS_LOCK_MARKER = "plc-ios-keyboard-lock";
+const IOS_LOCK_SCRIPT = `<script class="${IOS_LOCK_MARKER}">(function(){var ua=navigator.userAgent;if(!/iP(hone|ad|od)/.test(ua)||window.MSStream)return;var h=window.innerHeight;var s=document.createElement('style');s.className='plc-ios-lock-style';function apply(){s.textContent='html,body,#root{height:'+h+'px!important;max-height:'+h+'px!important;}'}apply();document.head.appendChild(s);window.addEventListener('resize',function(){var n=window.innerHeight,d=Math.abs(n-h);if(d>0&&d<150){h=n;apply();}},{passive:true});document.addEventListener('focusout',function(){setTimeout(function(){window.scrollTo(0,0);},150);},true);})();</script>`;
+
+// Remove stale copies from previous patch runs
+html = html.replace(/<script class="plc-ios-keyboard-lock">[\s\S]*?<\/script>\s*/g, "");
+
+if (!html.includes(IOS_LOCK_MARKER)) {
+  html = html.replace("</head>", `  ${IOS_LOCK_SCRIPT}\n</head>`);
+  changed = true;
+  console.log("patch-web-dist: injected iOS Safari keyboard height-lock script");
+}
+
+// ── 3. interactive-widget=resizes-visual ────────────────────────────────────
 const VIEWPORT_RE = /(<meta\s+name="viewport"\s+content=")([^"]*)(")/;
 const match = html.match(VIEWPORT_RE);
 if (match && !match[2].includes("interactive-widget")) {
