@@ -95,9 +95,9 @@ function resetViewportZoom() {
   if (Platform.OS !== "web") return;
   const viewport = document.querySelector("meta[name=viewport]") as HTMLMetaElement | null;
   if (!viewport) return;
-  viewport.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, interactive-widget=overlays-content");
+  viewport.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1");
   setTimeout(() => {
-    viewport.setAttribute("content", "width=device-width, initial-scale=1, interactive-widget=overlays-content");
+    viewport.setAttribute("content", "width=device-width, initial-scale=1");
   }, 50);
 }
 
