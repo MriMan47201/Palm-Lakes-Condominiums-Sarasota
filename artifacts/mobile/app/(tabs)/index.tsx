@@ -170,6 +170,12 @@ export default function DirectoryScreen() {
   const [sortMode, setSortMode] = useState<SortMode>("street1");
   const [menuVisible, setMenuVisible] = useState(false);
 
+  useEffect(() => {
+    navigation.setOptions({
+      tabBarStyle: selectedProperty ? { display: "none" } : undefined,
+    });
+  }, [selectedProperty, navigation]);
+
   const menuAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -416,14 +422,16 @@ export default function DirectoryScreen() {
         keyboardShouldPersistTaps="handled"
       />
 
-      <Pressable
-        onPress={openMenu}
-        style={[styles.hamburgerBtn, { top: stableTop + 22 }]}
-      >
-        <View style={styles.hamburgerInner}>
-          <Icon name="menu" size={24} color="#fff" />
-        </View>
-      </Pressable>
+      {!selectedProperty && (
+        <Pressable
+          onPress={openMenu}
+          style={[styles.hamburgerBtn, { top: stableTop + 22 }]}
+        >
+          <View style={styles.hamburgerInner}>
+            <Icon name="menu" size={24} color="#fff" />
+          </View>
+        </Pressable>
+      )}
 
       <PropertyDetailSheet
         property={selectedProperty}
