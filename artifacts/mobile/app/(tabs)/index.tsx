@@ -203,7 +203,7 @@ export default function DirectoryScreen() {
     closeMenu();
   }, [closeMenu]);
 
-  const searchTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleSearchChange = useCallback((text: string) => {
     setSearch(text);
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
@@ -332,7 +332,7 @@ export default function DirectoryScreen() {
         </View>
       ) : null}
     </View>
-  ), [isDark, theme, syncInfo, syncMutation.isPending, search, debouncedSearch, total, isLoading, handleSync, handleSearchChange, insets, sortMode]);
+  ), [isDark, theme, syncInfo, syncMutation.isPending, search, debouncedSearch, total, isLoading, handleSync, handleSearchChange, stableTop, sortMode]);
 
   const renderItem = useCallback(
     ({ item }: { item: Property }) => (
@@ -391,8 +391,6 @@ export default function DirectoryScreen() {
     inputRange: [0, 1],
     outputRange: [0, 1],
   });
-
-  const sortLabel = SORT_OPTIONS.find((o) => o.mode === sortMode)?.label ?? "Sort";
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>

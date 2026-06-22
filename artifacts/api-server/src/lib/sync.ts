@@ -1,5 +1,5 @@
 import { db, propertiesTable, syncLogTable } from "@workspace/db";
-import { desc, count, sql, eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { logger } from "./logger";
 
 const SUBDIV_NAME = "PALM LAKES A CONDOMINIUM";
@@ -162,14 +162,5 @@ export async function shouldSync(): Promise<boolean> {
   if (lastSync.length === 0) return true;
 
   const lastSyncTime = new Date(lastSync[0].syncedAt).getTime();
-  const oneDayMs = 24 * 60 * 60 * 1000;
-  if (Date.now() - lastSyncTime > oneDayMs) return true;
-
-  // Also sync if properties exist but have no lot_number data (migration scenario)
-  const nullCount = await db
-    .select({ count: count() })
-    .from(propertiesTable)
-    .where(sql`lot_number IS NULL AND parcel_id != '2029601009'`);
-
-  return (nullCount[0]?.count ?? 0) > 0;
+  return Date.now() - lastSyncTime > 24 * 60 * 60 * 1000;
 }

@@ -46,7 +46,6 @@ export type PropertiesResponse = {
 export type SyncInfo = {
   lastSyncAt: string | null;
   count: number;
-  nextSyncAt: string | null;
 };
 
 export type SyncResult = {

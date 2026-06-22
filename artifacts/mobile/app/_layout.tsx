@@ -1,10 +1,10 @@
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  useFonts,
-} from "@expo-google-fonts/inter";
+import { useFonts } from "expo-font";
+
+// Import each weight directly to avoid bundling all 18 Inter variants from the package index
+const Inter_400Regular = require("@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf");
+const Inter_500Medium = require("@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf");
+const Inter_600SemiBold = require("@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf");
+const Inter_700Bold = require("@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf");
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";

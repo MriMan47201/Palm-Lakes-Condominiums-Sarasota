@@ -124,32 +124,23 @@ router.post("/properties/sync", async (req, res) => {
 
 router.get("/properties/last-sync", async (req, res) => {
   try {
-    const lastSync = await db
-      .select()
-      .from(syncLogTable)
-      .orderBy(desc(syncLogTable.syncedAt))
-      .limit(1);
-
-    const propertyCount = await db.select({ count: count() }).from(propertiesTable)
-      .where(ne(propertiesTable.parcelId, "2029601009"));
-
-    const lastSyncAt = lastSync[0]?.syncedAt?.toISOString() ?? null;
-    let nextSyncAt: string | null = null;
-
-    if (lastSyncAt) {
-      const nextDate = new Date(lastSyncAt);
-      nextDate.setDate(nextDate.getDate() + 1);
-      nextSyncAt = nextDate.toISOString();
-    }
+    const [lastSync, propertyCount] = await Promise.all([
+      db.select({ syncedAt: syncLogTable.syncedAt })
+        .from(syncLogTable)
+        .orderBy(desc(syncLogTable.syncedAt))
+        .limit(1),
+      db.select({ count: count() })
+        .from(propertiesTable)
+        .where(ne(propertiesTable.parcelId, "2029601009")),
+    ]);
 
     res.json({
-      lastSyncAt,
+      lastSyncAt: lastSync[0]?.syncedAt?.toISOString() ?? null,
       count: propertyCount[0]?.count ?? 0,
-      nextSyncAt,
     });
   } catch (err) {
     req.log.error({ err }, "Failed to get last sync");
-    res.status(500).json({ lastSyncAt: null, count: 0, nextSyncAt: null });
+    res.status(500).json({ lastSyncAt: null, count: 0 });
   }
 });
 
