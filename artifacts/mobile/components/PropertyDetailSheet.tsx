@@ -64,30 +64,6 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
 
   useEffect(() => {
     if (!editing) { closingRef.current = false; setKeyboardHeight(0); return; }
-
-    // Web: use window.visualViewport to measure real keyboard height.
-    // RN's Keyboard API always returns endCoordinates.height=0 on web.
-    //
-    // Base height reference: window.__PLC_BASE_HEIGHT is set by the iOS lock
-    // script at page-load time (before any keyboard ever opens), so it is
-    // immune to the timing race where autoFocus fires the keyboard animation
-    // before this useEffect runs and vv.height is already shrinking.
-    // Falls back to window.innerHeight if the lock script isn't present
-    // (e.g. Android Chrome, where interactive-widget handles layout instead).
-    if (Platform.OS === "web") {
-      const vv = typeof window !== "undefined" ? (window as any).visualViewport : null;
-      if (!vv) return;
-      const baseHeight: number =
-        (typeof window !== "undefined" && (window as any).__PLC_BASE_HEIGHT) ||
-        window.innerHeight;
-      const onResize = () => {
-        setKeyboardHeight(Math.max(0, baseHeight - vv.height));
-      };
-      vv.addEventListener("resize", onResize, { passive: true });
-      return () => vv.removeEventListener("resize", onResize);
-    }
-
-    // Native iOS / Android: use the standard Keyboard API
     const show = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
       (e) => setKeyboardHeight(e.endCoordinates.height)

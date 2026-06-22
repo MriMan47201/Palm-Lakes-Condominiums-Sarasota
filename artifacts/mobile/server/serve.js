@@ -117,11 +117,13 @@ function serveWebFile(urlPath, res) {
             ? prefix + close
             : prefix + ", interactive-widget=resizes-visual" + close
       )
-      // html{height:100lvh;overflow:hidden}: baseline CSS fix (URL-bar + Chrome).
-      // iOS-specific JS lock below handles the keyboard case for Safari browser.
+      // html{height:100lvh;overflow:hidden}: 100lvh is the "large viewport height"
+      // — constant before/after keyboard on iOS Safari 15.4+ and Chrome 108+.
+      // Prevents the root from shrinking when the keyboard opens, stopping the
+      // entire layout from shifting up. overflow:hidden blocks document panning.
       .replace(
         "</head>",
-        `  <style class="plc-keyboard-fix">html{height:100lvh;overflow:hidden;}</style>\n  <script class="plc-ios-keyboard-lock">(function(){var ua=navigator.userAgent;if(!/iP(hone|ad|od)/.test(ua)||window.MSStream)return;var h=window.innerHeight;window.__PLC_BASE_HEIGHT=h;var s=document.createElement('style');s.className='plc-ios-lock-style';function apply(){s.textContent='html,body,#root{height:'+h+'px!important;max-height:'+h+'px!important;}'}apply();document.head.appendChild(s);window.addEventListener('resize',function(){var n=window.innerHeight,d=Math.abs(n-h);if(d>0&&d<150){h=n;window.__PLC_BASE_HEIGHT=h;apply();}},{passive:true});document.addEventListener('focusout',function(){setTimeout(function(){window.scrollTo(0,0);},150);},true);})();</script>\n  ${PHONE_FRAME_INJECT}\n</head>`
+        `  <style class="plc-keyboard-fix">html{height:100lvh;overflow:hidden;}</style>\n  ${PHONE_FRAME_INJECT}\n</head>`
       );
     res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
     res.end(patched);
