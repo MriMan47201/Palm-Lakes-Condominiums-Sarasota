@@ -1,11 +1,11 @@
 @media (min-width: 520px) {
   html, body {
     background: #0d2029;
-    min-height: 100vh;
+    min-height: 100dvh;
   }
   #root {
     max-width: 430px;
-    min-height: 100vh;
+    min-height: 100dvh;
     margin: 0 auto;
     position: relative;
     overflow: hidden;
