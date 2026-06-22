@@ -85,7 +85,7 @@ export default function PropertyCard({ property, onPress, searchQuery = "", show
                 [styles.streetName, { color: theme.text, fontFamily: "Inter_600SemiBold" }],
                 { backgroundColor: theme.tint + "44", borderRadius: 2 }
               )}
-              {showUnit && property.lotNumber ? (
+              {showUnit && property.lotNumber && /^\d+$/.test(property.lotNumber.trim()) ? (
                 <Text style={[styles.unitNumber, { fontFamily: "Inter_700Bold" }]}>
                   {property.lotNumber}
                 </Text>
