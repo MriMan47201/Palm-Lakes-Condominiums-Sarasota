@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import Icon, { type IconName } from "@/components/Icon";
 import { LinearGradient } from "expo-linear-gradient";
 import { useScrollToTop } from "@react-navigation/native";
 import { useFocusEffect, useNavigation } from "expo-router";
@@ -101,7 +101,7 @@ function resetViewportZoom() {
   }, 50);
 }
 
-const SORT_OPTIONS: { mode: SortMode; icon: string; label: string; sub: string }[] = [
+const SORT_OPTIONS: { mode: SortMode; icon: IconName; label: string; sub: string }[] = [
   { mode: "street1", icon: "align-left",  label: "Street 1", sub: "31st · 32nd · 33rd · 77th · 78th · 79th" },
   { mode: "street2", icon: "align-left",  label: "Street 2", sub: "77th · 78th · 79th · 31st · 32nd · 33rd" },
   { mode: "number",  icon: "hash",        label: "Number",   sub: "By house number" },
@@ -280,7 +280,7 @@ export default function DirectoryScreen() {
         >
           <View style={styles.headerContent}>
             <View style={styles.headerTop}>
-              <Feather name="map-pin" size={18} color="#FFD94A" />
+              <Icon name="map-pin" size={18} color="#FFD94A" />
               <Text style={[styles.subdivisionLabel, { color: "#FFE880", fontFamily: "Inter_700Bold" }, Platform.select({ web: { textShadow: "0px 0px 4px rgba(0,0,0,0.95)" } as any, default: { textShadowColor: "rgba(0,0,0,0.95)", textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 4 } })]}>
                 {SUBDIVISION_NAME}
               </Text>
@@ -315,7 +315,7 @@ export default function DirectoryScreen() {
       </View>
 
       <View style={[styles.sortBar, { backgroundColor: theme.tint + "18", borderColor: theme.tint + "40" }]}>
-        <Feather name="sliders" size={13} color={theme.tint} />
+        <Icon name="sliders" size={13} color={theme.tint} />
         <Text style={[styles.sortBarLabel, { color: theme.textSecondary, fontFamily: "Inter_400Regular" }]}>
           Sort:
         </Text>
@@ -360,7 +360,7 @@ export default function DirectoryScreen() {
     if (debouncedSearch) {
       return (
         <View style={styles.centered}>
-          <Feather name="search" size={40} color={theme.textMuted} />
+          <Icon name="search" size={40} color={theme.textMuted} />
           <Text style={[styles.emptyTitle, { color: theme.text, fontFamily: "Inter_600SemiBold" }]}>
             No results found
           </Text>
@@ -372,7 +372,7 @@ export default function DirectoryScreen() {
     }
     return (
       <View style={styles.centered}>
-        <Feather name="home" size={48} color={theme.textMuted} />
+        <Icon name="home" size={48} color={theme.textMuted} />
         <Text style={[styles.emptyTitle, { color: theme.text, fontFamily: "Inter_600SemiBold" }]}>
           No properties yet
         </Text>
@@ -423,7 +423,7 @@ export default function DirectoryScreen() {
         style={[styles.hamburgerBtn, { top: stableTop + 22 }]}
       >
         <View style={styles.hamburgerInner}>
-          <Feather name="menu" size={24} color="#fff" />
+          <Icon name="menu" size={24} color="#fff" />
         </View>
       </Pressable>
 
@@ -458,7 +458,7 @@ export default function DirectoryScreen() {
             {/* Close row */}
             <View style={styles.menuCloseRow}>
               <Pressable onPress={closeMenu} style={styles.menuClose} hitSlop={12}>
-                <Feather name="x" size={22} color={theme.textMuted} />
+                <Icon name="x" size={22} color={theme.textMuted} />
               </Pressable>
             </View>
 
@@ -488,8 +488,8 @@ export default function DirectoryScreen() {
                     ]}
                   >
                     <View style={[styles.menuOptionIcon, { backgroundColor: active ? theme.tint : theme.backgroundTertiary }]}>
-                      <Feather
-                        name={opt.icon as any}
+                      <Icon
+                        name={opt.icon}
                         size={14}
                         color={active ? "#fff" : theme.textMuted}
                       />
@@ -506,7 +506,7 @@ export default function DirectoryScreen() {
                       </Text>
                     </View>
                     {active && (
-                      <Feather name="check" size={16} color={theme.tint} />
+                      <Icon name="check" size={16} color={theme.tint} />
                     )}
                   </Pressable>
                 );

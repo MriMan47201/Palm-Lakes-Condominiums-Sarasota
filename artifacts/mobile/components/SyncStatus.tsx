@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import Icon from "./Icon";
 import React from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
 import Colors from "@/constants/colors";
@@ -72,7 +72,7 @@ export default function SyncStatus({ syncInfo, isSyncing, onSync }: Props) {
         {isSyncing ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
-          <Feather name="refresh-cw" size={14} color="#fff" />
+          <Icon name="refresh-cw" size={14} color="#fff" />
         )}
         <Text style={[styles.syncBtnText, { fontFamily: "Inter_600SemiBold" }]}>
           {isSyncing ? "Syncing..." : "Sync Now"}

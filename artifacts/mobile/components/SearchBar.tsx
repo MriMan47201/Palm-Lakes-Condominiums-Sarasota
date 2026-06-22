@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import Icon from "./Icon";
 import React, { useCallback } from "react";
 import {
   Platform,
@@ -33,7 +33,7 @@ export default function SearchBar({ value, onChangeText, placeholder = "Search b
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? theme.navyMid : theme.backgroundSecondary, borderColor: theme.separator }]}>
-      <Feather name="search" size={16} color={theme.textMuted} style={styles.icon} />
+      <Icon name="search" size={16} color={theme.textMuted} style={styles.icon} />
       <TextInput
         value={value}
         onChangeText={onChangeText}
@@ -52,7 +52,7 @@ export default function SearchBar({ value, onChangeText, placeholder = "Search b
           hitSlop={8}
           style={[styles.clearBtn, { backgroundColor: theme.textMuted + "33" }]}
         >
-          <Feather name="x" size={12} color={theme.textMuted} />
+          <Icon name="x" size={12} color={theme.textMuted} />
         </Pressable>
       )}
     </View>

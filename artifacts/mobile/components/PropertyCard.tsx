@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import Icon from "./Icon";
 import StickFigureIcon from "./StickFigureIcon";
 import React from "react";
 import {
@@ -134,7 +134,7 @@ export default function PropertyCard({ property, onPress, searchQuery = "", show
       </View>
 
       <View style={styles.arrow}>
-        <Feather name="chevron-right" size={16} color={theme.textMuted} />
+        <Icon name="chevron-right" size={16} color={theme.textMuted} />
       </View>
     </Pressable>
   );

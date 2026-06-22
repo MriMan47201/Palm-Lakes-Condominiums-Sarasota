@@ -1,4 +1,3 @@
-import { Feather } from "@expo/vector-icons";
 import StickFigureIcon from "./StickFigureIcon";
 import HashIcon from "./HashIcon";
 import EnvelopeIcon from "./EnvelopeIcon";

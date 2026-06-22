@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import Icon from "./Icon";
 import React, { useEffect, useRef } from "react";
 import { Animated, Platform, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -59,7 +59,7 @@ export default function OfflineBanner() {
       ]}
     >
       <View style={styles.banner}>
-        <Feather name="wifi-off" size={15} color="#FFE880" style={styles.icon} />
+        <Icon name="wifi-off" size={15} color="#FFE880" style={styles.icon} />
         <Text style={styles.text}>
           You are currently offline. Local notes and changes will save to your
           device and sync when connection returns.
