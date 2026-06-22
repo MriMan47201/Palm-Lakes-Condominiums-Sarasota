@@ -104,12 +104,12 @@ function serveWebFile(urlPath, res) {
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || "application/octet-stream";
 
-  // Inject phone-frame stylesheet and viewport fix into the HTML shell
+  // Inject phone-frame stylesheet and mobile keyboard fixes into the HTML shell
   if (filePath.endsWith("index.html")) {
     const raw = fs.readFileSync(filePath, "utf-8");
-    // interactive-widget=resizes-visual: keyboard overlays content instead of
-    // resizing the layout viewport, preventing the whole app from shifting up.
     const patched = raw
+      // interactive-widget=resizes-visual: keyboard overlays instead of
+      // resizing the layout viewport (Chrome 108+ Android).
       .replace(
         /(<meta\s+name="viewport"\s+content="[^"]*?)(")/,
         (_, prefix, close) =>
@@ -117,7 +117,12 @@ function serveWebFile(urlPath, res) {
             ? prefix + close
             : prefix + ", interactive-widget=resizes-visual" + close
       )
-      .replace("</head>", `${PHONE_FRAME_INJECT}</head>`);
+      // html{overflow:hidden}: prevents document-level panning when an input
+      // is focused on mobile — expo-reset already sets this on body but not html.
+      .replace(
+        "</head>",
+        `  <style class="plc-html-overflow-fix">html{overflow:hidden;}</style>\n  ${PHONE_FRAME_INJECT}\n</head>`
+      );
     res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
     res.end(patched);
     return;

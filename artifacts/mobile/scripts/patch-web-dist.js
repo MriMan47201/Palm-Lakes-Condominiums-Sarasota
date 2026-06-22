@@ -2,22 +2,20 @@
 /**
  * Post-export patch for dist/index.html.
  *
- * Expo's static exporter ignores app/+html.tsx when generating the web
- * index.html shell, so we post-process it here. Run this after every
- * `expo export --platform web` invocation (see the "export" script in
- * package.json).
+ * Expo's static exporter ignores app/+html.tsx for the HTML shell, so we
+ * post-process it here. Run via `pnpm run export` (chains after expo export).
  *
  * Patches applied:
  *
- * 1. Height-lock script — captures window.innerHeight BEFORE the virtual
- *    keyboard ever appears and locks that pixel value into CSS. This prevents
- *    the entire app from shifting up when the keyboard opens on mobile, which
- *    happens because the browser resizes the layout viewport (shrinking
- *    html/body/root with it).
+ * 1. overflow: hidden on <html> — the expo-reset CSS already sets this on
+ *    <body>, but mobile browsers (especially Chrome Android) can still scroll
+ *    the document element when an input is focused, panning the whole page up.
+ *    Locking <html> as well prevents that document-level pan.
  *
- * 2. interactive-widget=resizes-visual — bonus viewport hint for Chrome 108+
- *    Android: tells the browser to overlay the keyboard instead of resizing
- *    the layout viewport. Belt-and-suspenders alongside the height-lock.
+ * 2. interactive-widget=resizes-visual — viewport hint for Chrome 108+ Android:
+ *    tells the browser to overlay the keyboard instead of resizing the layout
+ *    viewport, so absolutely-positioned elements (tab bar, hamburger) don't
+ *    shift when the keyboard opens.
  */
 
 const fs = require("fs");
@@ -33,27 +31,23 @@ if (!fs.existsSync(htmlPath)) {
 let html = fs.readFileSync(htmlPath, "utf-8");
 let changed = false;
 
-// ── 1. Height-lock script ────────────────────────────────────────────────────
-// Inject as the very first child of <head> so it runs before any styles or
-// framework code. Idempotent: skipped if the marker id is already present.
-const VH_LOCK_ID = "vh-lock-script";
-const VH_LOCK = [
-  `<script id="${VH_LOCK_ID}">`,
-  "(function(){",
-  "var h=window.innerHeight;",
-  "var s=document.createElement('style');",
-  "s.id='vh-lock-style';",
-  "s.textContent='html,body,#root{height:'+h+'px!important;",
-  "max-height:'+h+'px!important;overflow:hidden!important;}';",
-  "document.head.appendChild(s);",
-  "})();",
-  "</script>",
-].join("");
-
-if (!html.includes(VH_LOCK_ID)) {
-  html = html.replace("<head>", "<head>\n    " + VH_LOCK);
+// ── 0. Remove legacy height-lock script (caused header to get stuck off-screen)
+const LEGACY_LOCK_RE = /<script id="vh-lock-script">[\s\S]*?<\/script>\s*/;
+if (LEGACY_LOCK_RE.test(html)) {
+  html = html.replace(LEGACY_LOCK_RE, "");
   changed = true;
-  console.log("patch-web-dist: injected height-lock script");
+  console.log("patch-web-dist: removed legacy height-lock script");
+}
+
+// ── 1. html { overflow: hidden } ────────────────────────────────────────────
+// Injected as a <style> inside <head>. Idempotent via marker class.
+const OVERFLOW_MARKER = "plc-html-overflow-fix";
+const OVERFLOW_STYLE = `<style class="${OVERFLOW_MARKER}">html{overflow:hidden;}</style>`;
+
+if (!html.includes(OVERFLOW_MARKER)) {
+  html = html.replace("</head>", `  ${OVERFLOW_STYLE}\n</head>`);
+  changed = true;
+  console.log("patch-web-dist: injected html{overflow:hidden} style");
 }
 
 // ── 2. interactive-widget=resizes-visual ────────────────────────────────────
@@ -66,7 +60,7 @@ if (match && !match[2].includes("interactive-widget")) {
       open + content + ", interactive-widget=resizes-visual" + close
   );
   changed = true;
-  console.log("patch-web-dist: added interactive-widget=resizes-visual");
+  console.log("patch-web-dist: added interactive-widget=resizes-visual to viewport");
 }
 
 if (changed) {
