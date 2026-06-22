@@ -129,13 +129,15 @@ export default function DirectoryScreen() {
   }, [insets.top]);
 
   // Self-repair: once the keyboard is fully gone the OS restores the real inset.
-  // Force-read it so the hamburger button is always in the right spot after keyboard use.
+  // Only ever adopt a LARGER value — never reset downward, which would shift the hamburger up.
   useEffect(() => {
     const sub = Keyboard.addListener("keyboardDidHide", () => {
       setTimeout(() => {
         const real = liveTop.current;
-        maxTop.current = real;
-        setStableTop(real);
+        if (real > maxTop.current) {
+          maxTop.current = real;
+          setStableTop(real);
+        }
       }, 80);
     });
     return () => sub.remove();
@@ -170,11 +172,6 @@ export default function DirectoryScreen() {
   const [sortMode, setSortMode] = useState<SortMode>("street1");
   const [menuVisible, setMenuVisible] = useState(false);
 
-  useEffect(() => {
-    navigation.setOptions({
-      tabBarStyle: selectedProperty ? { display: "none" } : undefined,
-    });
-  }, [selectedProperty, navigation]);
 
   const menuAnim = useRef(new Animated.Value(0)).current;
 
