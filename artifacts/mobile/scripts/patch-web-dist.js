@@ -39,15 +39,26 @@ if (LEGACY_LOCK_RE.test(html)) {
   console.log("patch-web-dist: removed legacy height-lock script");
 }
 
-// ── 1. html { overflow: hidden } ────────────────────────────────────────────
-// Injected as a <style> inside <head>. Idempotent via marker class.
-const OVERFLOW_MARKER = "plc-html-overflow-fix";
-const OVERFLOW_STYLE = `<style class="${OVERFLOW_MARKER}">html{overflow:hidden;}</style>`;
+// ── 1. Keyboard-stable root height ──────────────────────────────────────────
+// iOS Safari resizes the layout viewport when the keyboard opens, shrinking
+// html/body/#root (all height:100%) and shifting everything upward.
+// `height: 100lvh` (large viewport height) is defined as the viewport height
+// WITHOUT the keyboard — it stays constant when the keyboard appears.
+// Supported: iOS Safari 15.4+ (iPhone 15 = iOS 17 ✓), Chrome 108+.
+// Fallback: ignored by older browsers, which keep the existing height:100%.
+//
+// `overflow: hidden` on html prevents document-level panning/scroll on both
+// iOS Safari and Android Chrome when an input is focused.
+const KEYBOARD_FIX_MARKER = "plc-keyboard-fix";
+const KEYBOARD_FIX_STYLE = `<style class="${KEYBOARD_FIX_MARKER}">html{height:100lvh;overflow:hidden;}</style>`;
 
-if (!html.includes(OVERFLOW_MARKER)) {
-  html = html.replace("</head>", `  ${OVERFLOW_STYLE}\n</head>`);
+// Remove old overflow-only fix if present from a previous patch run
+html = html.replace(/<style class="plc-html-overflow-fix">[\s\S]*?<\/style>\s*/g, "");
+
+if (!html.includes(KEYBOARD_FIX_MARKER)) {
+  html = html.replace("</head>", `  ${KEYBOARD_FIX_STYLE}\n</head>`);
   changed = true;
-  console.log("patch-web-dist: injected html{overflow:hidden} style");
+  console.log("patch-web-dist: injected keyboard-stable height (100lvh) + overflow:hidden");
 }
 
 // ── 2. interactive-widget=resizes-visual ────────────────────────────────────
