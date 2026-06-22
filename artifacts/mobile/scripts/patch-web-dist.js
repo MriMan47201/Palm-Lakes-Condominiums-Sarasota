@@ -72,7 +72,7 @@ if (!html.includes(KEYBOARD_FIX_MARKER)) {
 // for URL-bar changes (~50 px) and ignores keyboard open/close (~290 px).
 // Chrome/Android is unaffected (interactive-widget handles it instead).
 const IOS_LOCK_MARKER = "plc-ios-keyboard-lock";
-const IOS_LOCK_SCRIPT = `<script class="${IOS_LOCK_MARKER}">(function(){var ua=navigator.userAgent;if(!/iP(hone|ad|od)/.test(ua)||window.MSStream)return;var h=window.innerHeight;var s=document.createElement('style');s.className='plc-ios-lock-style';function apply(){s.textContent='html,body,#root{height:'+h+'px!important;max-height:'+h+'px!important;}'}apply();document.head.appendChild(s);window.addEventListener('resize',function(){var n=window.innerHeight,d=Math.abs(n-h);if(d>0&&d<150){h=n;apply();}},{passive:true});document.addEventListener('focusout',function(){setTimeout(function(){window.scrollTo(0,0);},150);},true);})();</script>`;
+const IOS_LOCK_SCRIPT = `<script class="${IOS_LOCK_MARKER}">(function(){var ua=navigator.userAgent;if(!/iP(hone|ad|od)/.test(ua)||window.MSStream)return;var h=window.innerHeight;window.__PLC_BASE_HEIGHT=h;var s=document.createElement('style');s.className='plc-ios-lock-style';function apply(){s.textContent='html,body,#root{height:'+h+'px!important;max-height:'+h+'px!important;}'}apply();document.head.appendChild(s);window.addEventListener('resize',function(){var n=window.innerHeight,d=Math.abs(n-h);if(d>0&&d<150){h=n;window.__PLC_BASE_HEIGHT=h;apply();}},{passive:true});document.addEventListener('focusout',function(){setTimeout(function(){window.scrollTo(0,0);},150);},true);})();</script>`;
 
 // Remove stale copies from previous patch runs
 html = html.replace(/<script class="plc-ios-keyboard-lock">[\s\S]*?<\/script>\s*/g, "");
