@@ -117,13 +117,14 @@ function serveWebFile(urlPath, res) {
             ? prefix + close
             : prefix + ", interactive-widget=resizes-visual" + close
       )
-      // html{height:100lvh;overflow:hidden}: 100lvh is the "large viewport height"
-      // — constant before/after keyboard on iOS Safari 15.4+ and Chrome 108+.
-      // Prevents the root from shrinking when the keyboard opens, stopping the
-      // entire layout from shifting up. overflow:hidden blocks document panning.
+      // html{height:100dvh;overflow:hidden}: Dynamic Viewport Height adapts to
+      // mobile browser chrome and keyboard. overflow:hidden blocks document panning.
+      .replace(/<style class="plc-(?:html-overflow-fix|keyboard-fix)">[^<]*<\/style>\s*/g, "")
       .replace(
         "</head>",
-        `  <style class="plc-keyboard-fix">html{height:100lvh;overflow:hidden;}</style>\n  ${PHONE_FRAME_INJECT}\n</head>`
+        `  <style class="plc-dvh-fix">html{height:100dvh;overflow:hidden;}</style>\n` +
+        `  <script class="plc-blur-fix">document.addEventListener('blur',function(e){var t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA')){window.scrollTo({top:0,left:0,behavior:'instant'});}},true);</script>\n` +
+        `  ${PHONE_FRAME_INJECT}\n</head>`
       );
     res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
     res.end(patched);

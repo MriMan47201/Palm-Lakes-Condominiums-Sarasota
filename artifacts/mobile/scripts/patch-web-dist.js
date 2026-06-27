@@ -7,15 +7,20 @@
  *
  * Patches applied:
  *
- * 1. overflow: hidden on <html> — the expo-reset CSS already sets this on
- *    <body>, but mobile browsers (especially Chrome Android) can still scroll
- *    the document element when an input is focused, panning the whole page up.
- *    Locking <html> as well prevents that document-level pan.
+ * 1. html { height: 100dvh; overflow: hidden }
+ *    Dynamic Viewport Height lets the root adapt fluidly to mobile browser
+ *    address bars and the software keyboard without the hard clip of 100vh.
+ *    overflow: hidden on <html> prevents document-level panning when an
+ *    input is focused (expo-reset only sets this on <body>).
  *
- * 2. interactive-widget=resizes-visual — viewport hint for Chrome 108+ Android:
- *    tells the browser to overlay the keyboard instead of resizing the layout
- *    viewport, so absolutely-positioned elements (tab bar, hamburger) don't
- *    shift when the keyboard opens.
+ * 2. Blur snap-back script
+ *    When any input/textarea loses focus (keyboard closes) the mobile browser
+ *    may leave the layout viewport scrolled.  Calling window.scrollTo instantly
+ *    resets it to the baseline coordinates so the layout snaps back cleanly.
+ *
+ * 3. interactive-widget=resizes-visual
+ *    Viewport hint for Chrome 108+ Android: keyboard overlays instead of
+ *    resizing the layout viewport.
  */
 
 const fs = require("fs");
@@ -31,37 +36,56 @@ if (!fs.existsSync(htmlPath)) {
 let html = fs.readFileSync(htmlPath, "utf-8");
 let changed = false;
 
-// ── 0. Remove legacy height-lock script (caused header to get stuck off-screen)
-const LEGACY_LOCK_RE = /<script id="vh-lock-script">[\s\S]*?<\/script>\s*/;
-if (LEGACY_LOCK_RE.test(html)) {
-  html = html.replace(LEGACY_LOCK_RE, "");
-  changed = true;
-  console.log("patch-web-dist: removed legacy height-lock script");
+// ── 0. Remove legacy patches that are superseded by this version ─────────────
+const LEGACY_PATTERNS = [
+  // Old height-lock script
+  /<script id="vh-lock-script">[\s\S]*?<\/script>\s*/,
+  // Old overflow-only fix
+  /<style class="plc-html-overflow-fix">[\s\S]*?<\/style>\s*/g,
+  // Old lvh fix (replaced by dvh below)
+  /<style class="plc-keyboard-fix">[\s\S]*?<\/style>\s*/g,
+];
+for (const re of LEGACY_PATTERNS) {
+  if (re.test(html)) {
+    html = html.replace(re, "");
+    changed = true;
+    console.log("patch-web-dist: removed legacy patch:", re.toString().slice(0, 60));
+  }
 }
 
-// ── 1. Keyboard-stable root height ──────────────────────────────────────────
-// iOS Safari resizes the layout viewport when the keyboard opens, shrinking
-// html/body/#root (all height:100%) and shifting everything upward.
-// `height: 100lvh` (large viewport height) is defined as the viewport height
-// WITHOUT the keyboard — it stays constant when the keyboard appears.
-// Supported: iOS Safari 15.4+ (iPhone 15 = iOS 17 ✓), Chrome 108+.
-// Fallback: ignored by older browsers, which keep the existing height:100%.
-//
-// `overflow: hidden` on html prevents document-level panning/scroll on both
-// iOS Safari and Android Chrome when an input is focused.
-const KEYBOARD_FIX_MARKER = "plc-keyboard-fix";
-const KEYBOARD_FIX_STYLE = `<style class="${KEYBOARD_FIX_MARKER}">html{height:100lvh;overflow:hidden;}</style>`;
+// ── 1. html { height: 100dvh; overflow: hidden } ─────────────────────────────
+// 100dvh (Dynamic Viewport Height) adapts to mobile browser chrome and keyboard.
+// overflow: hidden blocks document-level panning when an input is focused.
+const DVH_MARKER = "plc-dvh-fix";
+const DVH_STYLE = `<style class="${DVH_MARKER}">html{height:100dvh;overflow:hidden;}</style>`;
 
-// Remove old overflow-only fix if present from a previous patch run
-html = html.replace(/<style class="plc-html-overflow-fix">[\s\S]*?<\/style>\s*/g, "");
-
-if (!html.includes(KEYBOARD_FIX_MARKER)) {
-  html = html.replace("</head>", `  ${KEYBOARD_FIX_STYLE}\n</head>`);
+if (!html.includes(DVH_MARKER)) {
+  html = html.replace("</head>", `  ${DVH_STYLE}\n</head>`);
   changed = true;
-  console.log("patch-web-dist: injected keyboard-stable height (100lvh) + overflow:hidden");
+  console.log("patch-web-dist: injected html{height:100dvh;overflow:hidden}");
 }
 
-// ── 2. interactive-widget=resizes-visual ────────────────────────────────────
+// ── 2. Blur snap-back ─────────────────────────────────────────────────────────
+// When any input/textarea loses focus the mobile browser may leave the viewport
+// scrolled after the keyboard closes.  This resets it instantly to origin so the
+// layout cleanly snaps back to baseline coordinates.
+const BLUR_MARKER = "plc-blur-fix";
+const BLUR_SCRIPT = `<script class="${BLUR_MARKER}">` +
+  `document.addEventListener('blur',function(e){` +
+    `var t=e.target;` +
+    `if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA')){` +
+      `window.scrollTo({top:0,left:0,behavior:'instant'});` +
+    `}` +
+  `},true);` +
+`</script>`;
+
+if (!html.includes(BLUR_MARKER)) {
+  html = html.replace("</head>", `  ${BLUR_SCRIPT}\n</head>`);
+  changed = true;
+  console.log("patch-web-dist: injected blur snap-back script");
+}
+
+// ── 3. interactive-widget=resizes-visual ────────────────────────────────────
 const VIEWPORT_RE = /(<meta\s+name="viewport"\s+content=")([^"]*)(")/;
 const match = html.match(VIEWPORT_RE);
 if (match && !match[2].includes("interactive-widget")) {
