@@ -104,30 +104,50 @@ function serveWebFile(urlPath, res) {
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || "application/octet-stream";
 
-  // Inject phone-frame stylesheet and mobile keyboard fixes into the HTML shell
+  // Inject PWA tags, iOS meta, phone-frame stylesheet and keyboard fixes into HTML
   if (filePath.endsWith("index.html")) {
-    const raw = fs.readFileSync(filePath, "utf-8");
-    const patched = raw
-      // interactive-widget=resizes-visual: keyboard overlays instead of
-      // resizing the layout viewport (Chrome 108+ Android).
-      .replace(
-        /(<meta\s+name="viewport"\s+content="[^"]*?)(")/,
-        (_, prefix, close) =>
-          prefix.includes("interactive-widget")
-            ? prefix + close
-            : prefix + ", interactive-widget=resizes-visual" + close
-      )
-      // html{height:100dvh;overflow:hidden}: Dynamic Viewport Height adapts to
-      // mobile browser chrome and keyboard. overflow:hidden blocks document panning.
-      .replace(/<style class="plc-(?:html-overflow-fix|keyboard-fix)">[^<]*<\/style>\s*/g, "")
-      .replace(
+    let raw = fs.readFileSync(filePath, "utf-8");
+
+    // Remove legacy patches
+    raw = raw.replace(/<style class="plc-(?:html-overflow-fix|keyboard-fix)">[^<]*<\/style>\s*/g, "");
+
+    // 1. <link rel="manifest"> if missing
+    if (!raw.includes('rel="manifest"')) {
+      raw = raw.replace("</head>", `  <link rel="manifest" href="/manifest.json" />\n</head>`);
+    }
+
+    // 2. viewport: viewport-fit=cover + interactive-widget=resizes-visual
+    raw = raw.replace(
+      /(<meta\s+name="viewport"\s+content=")([^"]*)(")/,
+      (_, open, content, close) => {
+        if (!content.includes("viewport-fit=cover")) content += ", viewport-fit=cover";
+        if (!content.includes("interactive-widget")) content += ", interactive-widget=resizes-visual";
+        return open + content + close;
+      }
+    );
+
+    // 3. iOS PWA meta tags
+    if (!raw.includes("plc-ios-meta")) {
+      raw = raw.replace(
         "</head>",
-        `  <style class="plc-dvh-fix">html{height:100dvh;overflow:hidden;}</style>\n` +
-        `  <script class="plc-blur-fix">document.addEventListener('blur',function(e){var t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA')){window.scrollTo({top:0,left:0,behavior:'instant'});}},true);</script>\n` +
-        `  ${PHONE_FRAME_INJECT}\n</head>`
+        `  <!-- iOS PWA (plc-ios-meta) -->\n` +
+        `  <meta name="apple-mobile-web-app-capable" content="yes" />\n` +
+        `  <meta name="apple-mobile-web-app-status-bar-style" content="default" />\n` +
+        `</head>`
       );
+    }
+
+    // 4. dvh fix + blur snap-back + phone frame
+    const injects = [];
+    if (!raw.includes("plc-dvh-fix"))
+      injects.push(`  <style class="plc-dvh-fix">html{height:100dvh;overflow:hidden;}</style>`);
+    if (!raw.includes("plc-blur-fix"))
+      injects.push(`  <script class="plc-blur-fix">document.addEventListener('blur',function(e){var t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA')){window.scrollTo({top:0,left:0,behavior:'instant'});}},true);</script>`);
+    injects.push(`  ${PHONE_FRAME_INJECT}`);
+    raw = raw.replace("</head>", injects.join("\n") + "\n</head>");
+
     res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-    res.end(patched);
+    res.end(raw);
     return;
   }
 
