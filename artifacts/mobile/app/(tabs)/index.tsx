@@ -21,7 +21,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Print from "expo-print";
-
+import { jsPDF } from "jspdf";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import PropertyCard from "@/components/PropertyCard";
@@ -30,6 +30,18 @@ import SyncStatus from "@/components/SyncStatus";
 import PropertyDetailSheet from "@/components/PropertyDetailSheet";
 import { useProperties, useSyncInfo, useSyncProperties, type Property } from "@/hooks/useApi";
 import { useAllNotes } from "@/hooks/useNotes";
+
+// Alert.alert() is a no-op stub on the web target of react-native-web, so
+// any Alert.alert() call silently does nothing there (no error, no popup).
+// Route through window.alert on web so users actually see failure/info
+// messages instead of the UI appearing to "do nothing".
+const notify = (title: string, message?: string) => {
+  if (Platform.OS === "web") {
+    if (typeof window !== "undefined") window.alert(message ? `${title}\n\n${message}` : title);
+  } else {
+    Alert.alert(title, message);
+  }
+};
 
 const ENTRANCE_IMAGE = require("../../assets/images/main-entrance.jpg");
 
@@ -257,7 +269,7 @@ export default function DirectoryScreen() {
   const handlePrintNotes = useCallback(async () => {
     const withNotes = allProperties.filter((p) => !!allNotes[p.address]?.trim());
     if (withNotes.length === 0) {
-      Alert.alert("No Notes", "You haven't saved any notes yet.");
+      notify("No Notes", "You haven't saved any notes yet.");
       return;
     }
     const escapeHtml = (s: string) =>
@@ -304,7 +316,12 @@ export default function DirectoryScreen() {
         // mode, offers "Print" (AirPrint) as an option, and always
         // returns the user right back to the app whether they print,
         // save, or cancel.
-        const { jsPDF } = await import("jspdf");
+        // NOTE: jsPDF is statically imported (not dynamically) so this
+        // call happens with no network/await delay after the tap — iOS
+        // Safari requires navigator.share() to run within a very short
+        // "user activation" window after the click, and any await on a
+        // lazy-loaded chunk fetch can silently expire that window,
+        // causing navigator.share() to throw with no visible feedback.
         const doc = new jsPDF({ unit: "pt", format: "letter" });
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
@@ -414,7 +431,7 @@ export default function DirectoryScreen() {
         const frameDoc = iframe.contentDocument || iframe.contentWindow?.document;
         if (!frameDoc) {
           cleanup();
-          Alert.alert("Print Failed", "Could not open the print dialog. Please try again.");
+          notify("Print Failed", "Could not open the print dialog. Please try again.");
           return;
         }
         frameDoc.open();
@@ -442,7 +459,7 @@ export default function DirectoryScreen() {
         await Print.printAsync({ html });
       }
     } catch {
-      Alert.alert("Print Failed", "Could not open the print dialog. Please try again.");
+      notify("Print Failed", "Could not open the print dialog. Please try again.");
     }
   }, [allProperties, allNotes]);
 
@@ -450,16 +467,12 @@ export default function DirectoryScreen() {
     try {
       const result = await syncMutation.mutateAsync();
       if (result.success) {
-        Alert.alert("Sync Complete", `Successfully loaded ${result.count} properties.`);
+        notify("Sync Complete", `Successfully loaded ${result.count} properties.`);
       } else {
-        Alert.alert(
-          "Sync Status",
-          result.message || "Could not fetch live data. Please try again later.",
-          [{ text: "OK" }]
-        );
+        notify("Sync Status", result.message || "Could not fetch live data. Please try again later.");
       }
     } catch {
-      Alert.alert("Sync Failed", "Please check your connection and try again.");
+      notify("Sync Failed", "Please check your connection and try again.");
     }
   }, [syncMutation]);
 
@@ -490,7 +503,7 @@ export default function DirectoryScreen() {
                 Sarasota, FL 34243
               </Text>
               <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.80)", fontFamily: "Inter_400Regular" }]}>
-                v1.3
+                v1.4
               </Text>
             </View>
           </View>
