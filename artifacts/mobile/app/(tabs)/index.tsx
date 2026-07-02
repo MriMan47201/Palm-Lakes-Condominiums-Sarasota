@@ -561,7 +561,15 @@ export default function DirectoryScreen() {
                   </Pressable>
                 );
               })}
+            </View>
 
+            {/* ── NOTES section ── */}
+            <View style={[styles.menuSectionDivider, { backgroundColor: theme.separator }]} />
+            <Text style={[styles.menuSectionLabel, { color: theme.tint, fontFamily: "Inter_700Bold" }]}>
+              Notes
+            </Text>
+
+            <View style={styles.menuOptions}>
               <Pressable
                 onPress={() => { closeMenu(); handlePrintNotes(); }}
                 style={({ pressed }) => [
@@ -580,9 +588,6 @@ export default function DirectoryScreen() {
                     styles.menuOptionLabel,
                     { color: theme.text, fontFamily: "Inter_600SemiBold" },
                   ]}>
-                    Notes
-                  </Text>
-                  <Text style={[styles.menuOptionSub, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
                     Print all saved notes
                   </Text>
                 </View>
