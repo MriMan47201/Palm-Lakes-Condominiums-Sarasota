@@ -11,6 +11,7 @@ import {
   Keyboard,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -523,7 +524,6 @@ export default function DirectoryScreen() {
                 backgroundColor: isDark ? theme.backgroundSecondary : "#FFFAF4",
                 borderLeftColor: theme.separator,
                 paddingTop: stableTop + 16,
-                paddingBottom: insets.bottom + 24,
               },
               { transform: [{ translateX: panelTranslate }] },
             ]}
@@ -534,6 +534,13 @@ export default function DirectoryScreen() {
                 <Icon name="x" size={22} color={theme.textMuted} />
               </Pressable>
             </View>
+
+            <ScrollView
+              style={styles.menuScroll}
+              contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
 
             {/* ── SORT BY section ── */}
             <View style={[styles.menuDivider, { backgroundColor: theme.separator }]} />
@@ -634,6 +641,7 @@ export default function DirectoryScreen() {
                 Public data sourced from Manatee County GIS
               </Text>
             </View>
+            </ScrollView>
           </Animated.View>
         </View>
       )}
@@ -767,6 +775,9 @@ const styles = StyleSheet.create({
         elevation: 16,
       },
     }),
+  },
+  menuScroll: {
+    flex: 1,
   },
   menuCloseRow: {
     flexDirection: "row",

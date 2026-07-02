@@ -1,1 +1,2 @@
 - [Expo web build/deploy flow](expo-web-deploy-flow.md) — export+patch commands, foreground-only execution, and RN-Web testing tool limitations for this mobile artifact.
+- [Expo-print web bug + scrollable overlays](expo-print-web-scrollable-overlays.md) — expo-print's `Print.printAsync({html})` ignores `html` on web; fixed-height RN overlay panels need an internal ScrollView or new content pushes earlier sections out of reach.
