@@ -151,7 +151,11 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
           style={{ flex: 1 }}
           contentContainerStyle={styles.noteModalOuter}
         >
-          <Pressable style={styles.noteModalBackdrop} onPress={handleClose} />
+          <Pressable
+            style={styles.noteModalBackdrop}
+            onPressIn={() => { closingRef.current = true; }}
+            onPress={handleClose}
+          />
           <View
             style={[styles.noteModal, {
               backgroundColor: isDark ? "#0F1B2E" : "#fff",
@@ -192,12 +196,14 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
 
             <View style={styles.noteModalActions}>
               <Pressable
+                onPressIn={() => { closingRef.current = true; }}
                 onPress={handleClose}
                 style={[styles.noteBtn, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary, borderColor: theme.separator }]}
               >
                 <Text style={[styles.noteBtnText, { color: theme.text, fontFamily: "Inter_500Medium" }]}>Cancel</Text>
               </Pressable>
               <Pressable
+                onPressIn={() => { closingRef.current = true; }}
                 onPress={handleSave}
                 style={[styles.noteBtn, styles.noteBtnPrimary, { backgroundColor: dirty ? theme.tint : theme.tint + "66" }]}
               >
