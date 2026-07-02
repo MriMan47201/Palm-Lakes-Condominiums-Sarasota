@@ -297,25 +297,51 @@ export default function DirectoryScreen() {
       </html>`;
     try {
       if (Platform.OS === "web") {
-        const printWindow = window.open("", "_blank");
-        if (!printWindow) {
-          Alert.alert(
-            "Pop-up Blocked",
-            "Please allow pop-ups for this site to print your notes."
-          );
+        const existing = document.getElementById("plc-print-frame");
+        if (existing) existing.remove();
+
+        const iframe = document.createElement("iframe");
+        iframe.id = "plc-print-frame";
+        iframe.style.position = "fixed";
+        iframe.style.right = "0";
+        iframe.style.bottom = "0";
+        iframe.style.width = "0";
+        iframe.style.height = "0";
+        iframe.style.border = "0";
+        iframe.style.visibility = "hidden";
+        document.body.appendChild(iframe);
+
+        const cleanup = () => {
+          iframe.contentWindow?.removeEventListener("afterprint", cleanup);
+          if (iframe.parentNode) iframe.remove();
+        };
+
+        const frameDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (!frameDoc) {
+          cleanup();
+          Alert.alert("Print Failed", "Could not open the print dialog. Please try again.");
           return;
         }
-        printWindow.document.open();
-        printWindow.document.write(html);
-        printWindow.document.close();
-        printWindow.focus();
+        frameDoc.open();
+        frameDoc.write(html);
+        frameDoc.close();
+
         const triggerPrint = () => {
-          printWindow.print();
+          const win = iframe.contentWindow;
+          if (!win) {
+            cleanup();
+            return;
+          }
+          win.addEventListener("afterprint", cleanup);
+          win.focus();
+          win.print();
+          setTimeout(cleanup, 60000);
         };
-        if (printWindow.document.readyState === "complete") {
+
+        if (frameDoc.readyState === "complete") {
           triggerPrint();
         } else {
-          printWindow.addEventListener("load", triggerPrint);
+          iframe.addEventListener("load", triggerPrint);
         }
       } else {
         await Print.printAsync({ html });
