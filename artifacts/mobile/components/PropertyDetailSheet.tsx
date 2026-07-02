@@ -64,15 +64,31 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
 
   useEffect(() => {
     if (!editing) { closingRef.current = false; setKeyboardHeight(0); return; }
+    // Tapping Save/Cancel blurs the focused TextInput, which fires the
+    // OS's keyboard-hide event synchronously as part of the same tap —
+    // *before* our onPress/onPressIn handlers run. If we reposition the
+    // modal (drop the keyboard-height margin) immediately on that hide
+    // event, the button slides to a new spot mid-tap and the tap's
+    // release lands on empty space, so Save/Cancel visually "does
+    // nothing" and needs a second tap. Debouncing the reposition gives
+    // the tap's click a moment to land and close the modal (unmounting
+    // this effect and clearing the timeout) before any slide happens.
+    let hideTimeout: ReturnType<typeof setTimeout> | null = null;
+    const clearPendingHide = () => {
+      if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; }
+    };
     const show = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
-      (e) => setKeyboardHeight(e.endCoordinates.height)
+      (e) => { clearPendingHide(); setKeyboardHeight(e.endCoordinates.height); }
     );
     const hide = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
-      () => { if (!closingRef.current) setKeyboardHeight(0); }
+      () => {
+        clearPendingHide();
+        hideTimeout = setTimeout(() => setKeyboardHeight(0), 300);
+      }
     );
-    return () => { show.remove(); hide.remove(); };
+    return () => { show.remove(); hide.remove(); clearPendingHide(); };
   }, [editing]);
 
   const resetZoom = useCallback(() => {
