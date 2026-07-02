@@ -19,6 +19,7 @@ import {
   Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Print from "expo-print";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -252,6 +253,54 @@ export default function DirectoryScreen() {
     setIsRefreshing(false);
   }, [refetch, refetchSync]);
 
+  const handlePrintNotes = useCallback(async () => {
+    const withNotes = allProperties.filter((p) => !!allNotes[p.address]?.trim());
+    if (withNotes.length === 0) {
+      Alert.alert("No Notes", "You haven't saved any notes yet.");
+      return;
+    }
+    const escapeHtml = (s: string) =>
+      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const rows = withNotes
+      .map((p) => {
+        const owner = escapeHtml(p.ownerName || "—");
+        const address = escapeHtml(p.address);
+        const note = escapeHtml(allNotes[p.address]).replace(/\n/g, "<br/>");
+        return `
+          <div class="entry">
+            <div class="owner">${owner}</div>
+            <div class="address">${address}</div>
+            <div class="note">${note}</div>
+          </div>`;
+      })
+      .join("\n");
+    const html = `
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <style>
+            body { font-family: -apple-system, Helvetica, Arial, sans-serif; color: #1a1a1a; padding: 24px; }
+            h1 { font-size: 18px; margin-bottom: 4px; }
+            .subtitle { font-size: 12px; color: #666; margin-bottom: 20px; }
+            .entry { padding: 12px 0; border-bottom: 1px solid #ddd; }
+            .owner { font-size: 14px; font-weight: 700; }
+            .address { font-size: 13px; color: #444; margin-top: 2px; }
+            .note { font-size: 13px; margin-top: 6px; white-space: pre-wrap; }
+          </style>
+        </head>
+        <body>
+          <h1>Palm Lakes Condominiums — Property Notes</h1>
+          <div class="subtitle">${withNotes.length} note${withNotes.length !== 1 ? "s" : ""}</div>
+          ${rows}
+        </body>
+      </html>`;
+    try {
+      await Print.printAsync({ html });
+    } catch {
+      Alert.alert("Print Failed", "Could not open the print dialog. Please try again.");
+    }
+  }, [allProperties, allNotes]);
+
   const handleSync = useCallback(async () => {
     try {
       const result = await syncMutation.mutateAsync();
@@ -296,7 +345,7 @@ export default function DirectoryScreen() {
                 Sarasota, FL 34243
               </Text>
               <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.80)", fontFamily: "Inter_400Regular" }]}>
-                v1.0
+                v1.1
               </Text>
             </View>
           </View>
@@ -512,6 +561,32 @@ export default function DirectoryScreen() {
                   </Pressable>
                 );
               })}
+
+              <Pressable
+                onPress={() => { closeMenu(); handlePrintNotes(); }}
+                style={({ pressed }) => [
+                  styles.menuOption,
+                  {
+                    backgroundColor: pressed ? theme.backgroundTertiary : "transparent",
+                    borderColor: "transparent",
+                  },
+                ]}
+              >
+                <View style={[styles.menuOptionIcon, { backgroundColor: theme.backgroundTertiary }]}>
+                  <Icon name="printer" size={14} color={theme.textMuted} />
+                </View>
+                <View style={styles.menuOptionText}>
+                  <Text style={[
+                    styles.menuOptionLabel,
+                    { color: theme.text, fontFamily: "Inter_600SemiBold" },
+                  ]}>
+                    Notes
+                  </Text>
+                  <Text style={[styles.menuOptionSub, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+                    Print all saved notes
+                  </Text>
+                </View>
+              </Pressable>
             </View>
 
             {/* ── ABOUT section ── */}
