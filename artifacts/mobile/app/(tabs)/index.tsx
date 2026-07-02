@@ -297,6 +297,101 @@ export default function DirectoryScreen() {
       </html>`;
     try {
       if (Platform.OS === "web") {
+        // Home-screen ("standalone") PWAs on iOS/Android have no browser
+        // chrome, so window.print() silently does nothing there. The
+        // reliable cross-context way to print is to hand a real PDF file
+        // to the OS's native Share Sheet — it works even in standalone
+        // mode, offers "Print" (AirPrint) as an option, and always
+        // returns the user right back to the app whether they print,
+        // save, or cancel.
+        const { jsPDF } = await import("jspdf");
+        const doc = new jsPDF({ unit: "pt", format: "letter" });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const marginX = 48;
+        let y = 56;
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text("Palm Lakes Condominiums", marginX, y);
+        y += 20;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.setTextColor(90);
+        doc.text(
+          `Property Notes — ${withNotes.length} note${withNotes.length !== 1 ? "s" : ""}`,
+          marginX,
+          y
+        );
+        y += 20;
+        doc.setDrawColor(210);
+        doc.line(marginX, y, pageWidth - marginX, y);
+        y += 20;
+        doc.setTextColor(20);
+
+        const ensureSpace = (needed: number) => {
+          if (y + needed > pageHeight - 48) {
+            doc.addPage();
+            y = 56;
+          }
+        };
+
+        withNotes.forEach((p) => {
+          const owner = p.ownerName || "—";
+          const noteLines = doc.splitTextToSize(allNotes[p.address], pageWidth - marginX * 2);
+
+          ensureSpace(20);
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(12);
+          doc.setTextColor(20);
+          doc.text(owner, marginX, y);
+          y += 16;
+
+          ensureSpace(14);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          doc.setTextColor(90);
+          doc.text(p.address, marginX, y);
+          y += 16;
+
+          ensureSpace(noteLines.length * 13);
+          doc.setFontSize(11);
+          doc.setTextColor(30);
+          doc.text(noteLines, marginX, y);
+          y += noteLines.length * 13 + 10;
+
+          ensureSpace(14);
+          doc.setDrawColor(230);
+          doc.line(marginX, y, pageWidth - marginX, y);
+          y += 18;
+        });
+
+        const pdfBlob: Blob = doc.output("blob");
+
+        const nav: any = typeof navigator !== "undefined" ? navigator : null;
+        const canShareFiles =
+          nav &&
+          typeof nav.share === "function" &&
+          typeof nav.canShare === "function" &&
+          typeof File !== "undefined";
+
+        if (canShareFiles) {
+          const file = new File([pdfBlob], "palm-lakes-notes.pdf", { type: "application/pdf" });
+          if (nav.canShare({ files: [file] })) {
+            try {
+              await nav.share({
+                files: [file],
+                title: "Palm Lakes Condominiums — Property Notes",
+              });
+            } catch (shareErr: any) {
+              if (shareErr?.name !== "AbortError") throw shareErr;
+            }
+            return;
+          }
+        }
+
+        // Fallback (desktop browsers without file sharing, or plain
+        // browser tabs): print directly from a hidden iframe.
         const existing = document.getElementById("plc-print-frame");
         if (existing) existing.remove();
 

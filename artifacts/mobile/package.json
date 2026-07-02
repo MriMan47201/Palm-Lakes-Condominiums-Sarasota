@@ -57,6 +57,7 @@
     "zod-validation-error": "^3.4.0"
   },
   "dependencies": {
-    "expo-print": "~15.0.8"
+    "expo-print": "~15.0.8",
+    "jspdf": "^4.2.1"
   }
 }
