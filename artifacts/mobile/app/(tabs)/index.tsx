@@ -295,7 +295,30 @@ export default function DirectoryScreen() {
         </body>
       </html>`;
     try {
-      await Print.printAsync({ html });
+      if (Platform.OS === "web") {
+        const printWindow = window.open("", "_blank");
+        if (!printWindow) {
+          Alert.alert(
+            "Pop-up Blocked",
+            "Please allow pop-ups for this site to print your notes."
+          );
+          return;
+        }
+        printWindow.document.open();
+        printWindow.document.write(html);
+        printWindow.document.close();
+        printWindow.focus();
+        const triggerPrint = () => {
+          printWindow.print();
+        };
+        if (printWindow.document.readyState === "complete") {
+          triggerPrint();
+        } else {
+          printWindow.addEventListener("load", triggerPrint);
+        }
+      } else {
+        await Print.printAsync({ html });
+      }
     } catch {
       Alert.alert("Print Failed", "Could not open the print dialog. Please try again.");
     }
