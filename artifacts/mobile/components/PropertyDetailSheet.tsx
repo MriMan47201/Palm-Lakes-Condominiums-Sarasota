@@ -60,35 +60,18 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
   const [draft, setDraft] = useState("");
   const [dirty, setDirty] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const closingRef = React.useRef(false);
 
   useEffect(() => {
-    if (!editing) { closingRef.current = false; setKeyboardHeight(0); return; }
-    // Tapping Save/Cancel blurs the focused TextInput, which fires the
-    // OS's keyboard-hide event synchronously as part of the same tap —
-    // *before* our onPress/onPressIn handlers run. If we reposition the
-    // modal (drop the keyboard-height margin) immediately on that hide
-    // event, the button slides to a new spot mid-tap and the tap's
-    // release lands on empty space, so Save/Cancel visually "does
-    // nothing" and needs a second tap. Debouncing the reposition gives
-    // the tap's click a moment to land and close the modal (unmounting
-    // this effect and clearing the timeout) before any slide happens.
-    let hideTimeout: ReturnType<typeof setTimeout> | null = null;
-    const clearPendingHide = () => {
-      if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; }
-    };
+    if (!editing) { setKeyboardHeight(0); return; }
     const show = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
-      (e) => { clearPendingHide(); setKeyboardHeight(e.endCoordinates.height); }
+      (e) => setKeyboardHeight(e.endCoordinates.height)
     );
     const hide = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
-      () => {
-        clearPendingHide();
-        hideTimeout = setTimeout(() => setKeyboardHeight(0), 300);
-      }
+      () => setKeyboardHeight(0)
     );
-    return () => { show.remove(); hide.remove(); clearPendingHide(); };
+    return () => { show.remove(); hide.remove(); };
   }, [editing]);
 
   const resetZoom = useCallback(() => {
@@ -114,7 +97,6 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
   };
 
   const handleSave = async () => {
-    closingRef.current = true;
     Keyboard.dismiss();
     await saveNote(draft);
     setDirty(false);
@@ -122,7 +104,6 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
   };
 
   const handleClose = () => {
-    closingRef.current = true;
     Keyboard.dismiss();
     setEditing(false);
   };
@@ -167,11 +148,7 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
           style={{ flex: 1 }}
           contentContainerStyle={styles.noteModalOuter}
         >
-          <Pressable
-            style={styles.noteModalBackdrop}
-            onPressIn={() => { closingRef.current = true; }}
-            onPress={handleClose}
-          />
+          <Pressable style={styles.noteModalBackdrop} onPress={handleClose} />
           <View
             style={[styles.noteModal, {
               backgroundColor: isDark ? "#0F1B2E" : "#fff",
@@ -212,14 +189,12 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
 
             <View style={styles.noteModalActions}>
               <Pressable
-                onPressIn={() => { closingRef.current = true; }}
                 onPress={handleClose}
                 style={[styles.noteBtn, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary, borderColor: theme.separator }]}
               >
                 <Text style={[styles.noteBtnText, { color: theme.text, fontFamily: "Inter_500Medium" }]}>Cancel</Text>
               </Pressable>
               <Pressable
-                onPressIn={() => { closingRef.current = true; }}
                 onPress={handleSave}
                 style={[styles.noteBtn, styles.noteBtnPrimary, { backgroundColor: dirty ? theme.tint : theme.tint + "66" }]}
               >
