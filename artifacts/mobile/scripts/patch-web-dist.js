@@ -26,6 +26,14 @@
  *
  * 5. Blur snap-back script — resets window scroll to (0,0) when any input or
  *    textarea loses focus so the layout snaps back after the keyboard closes.
+ *
+ * 6. body { position: fixed; inset: 0 } — without this, iOS Safari scrolls/pans
+ *    the whole document to keep a focused input visible above the keyboard.
+ *    That pan does not always fully reverse when the keyboard closes, leaving
+ *    the page shifted up and overlapping the status bar / Dynamic Island.
+ *    Pinning the body removes the document's ability to scroll at all, so iOS
+ *    can only resize the visual viewport (safe, handled by
+ *    useSafeAreaInsets()) instead of panning the whole page.
  */
 
 const fs = require("fs");
@@ -131,6 +139,18 @@ if (!html.includes(BLUR_MARKER)) {
   html = html.replace("</head>", `  ${BLUR_SCRIPT}\n</head>`);
   changed = true;
   console.log("patch-web-dist: injected blur snap-back script");
+}
+
+// ── 6. Lock <body> in place (prevents iOS keyboard-focus page pan) ──────────
+const BODY_FIX_MARKER = "plc-body-fixed-fix";
+const BODY_FIX_STYLE =
+  `<style class="${BODY_FIX_MARKER}">` +
+  `body{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;overflow:hidden;}` +
+  `</style>`;
+if (!html.includes(BODY_FIX_MARKER)) {
+  html = html.replace("</head>", `  ${BODY_FIX_STYLE}\n</head>`);
+  changed = true;
+  console.log("patch-web-dist: injected body{position:fixed} iOS keyboard-pan fix");
 }
 
 if (changed) {
