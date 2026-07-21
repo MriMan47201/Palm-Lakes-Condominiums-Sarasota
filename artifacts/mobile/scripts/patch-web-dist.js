@@ -122,11 +122,9 @@ if (!html.includes(DVH_MARKER)) {
   console.log("patch-web-dist: injected html{height:100dvh;overflow:hidden}");
 }
 
-// ── 5. Blur snap-back + visualViewport scroll guard ───────────────────────────
-// On blur: resets window scroll to (0,0) so layout snaps back after keyboard.
-// visualViewport.scroll guard: on iOS Safari/PWA, even with body:fixed, the
-// visual viewport can accumulate a pageTop offset (pan) when inputs are focused.
-// Force window.scrollTo(0,0) on every visualViewport scroll event to clear it.
+// ── 5. Blur snap-back ─────────────────────────────────────────────────────────
+// Resets the layout viewport to (0,0) when any input/textarea loses focus so
+// the layout snaps cleanly back after the keyboard closes.
 const BLUR_MARKER = "plc-blur-fix";
 const BLUR_SCRIPT =
   `<script class="${BLUR_MARKER}">` +
@@ -136,11 +134,6 @@ const BLUR_SCRIPT =
       `window.scrollTo({top:0,left:0,behavior:'instant'});` +
     `}` +
   `},true);` +
-  `if(window.visualViewport){` +
-    `window.visualViewport.addEventListener('scroll',function(){` +
-      `window.scrollTo({top:0,left:0,behavior:'instant'});` +
-    `});` +
-  `}` +
   `</script>`;
 if (!html.includes(BLUR_MARKER)) {
   html = html.replace("</head>", `  ${BLUR_SCRIPT}\n</head>`);
