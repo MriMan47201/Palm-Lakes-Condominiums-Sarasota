@@ -177,6 +177,43 @@ export default function DirectoryScreen() {
     setSelectedProperty(property);
   }, []);
 
+  // Called by onClose — restores the list to the scroll position saved at the
+  // moment the user tapped the card. Fires multiple times to survive the iOS
+  // keyboard-dismiss animation (≈350 ms) and any visual-viewport pan lag.
+  const restoreListScroll = useCallback(() => {
+    const doRestore = () => {
+      listRef.current?.scrollToOffset({ offset: savedScrollOffset.current, animated: false });
+      if (Platform.OS === "web") {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+        if (document.documentElement) document.documentElement.scrollTop = 0;
+        if (document.body) document.body.scrollTop = 0;
+      }
+    };
+
+    // Immediate: handles fast close when keyboard was never open
+    doRestore();
+
+    // ~350 ms: covers iOS keyboard dismiss animation
+    const t1 = setTimeout(doRestore, 350);
+    // 700 ms: belt-and-suspenders for slow devices
+    const t2 = setTimeout(doRestore, 700);
+
+    // Web: listen for visualViewport resize — the moment the keyboard is fully
+    // gone, the viewport height snaps back up; that's the ideal time to restore.
+    if (Platform.OS === "web" && typeof window !== "undefined" && window.visualViewport) {
+      const vp = window.visualViewport!;
+      const onVpResize = () => {
+        doRestore();
+        vp.removeEventListener("resize", onVpResize);
+      };
+      vp.addEventListener("resize", onVpResize);
+      // Safety: remove the listener after 1 s even if it never fired
+      setTimeout(() => vp.removeEventListener("resize", onVpResize), 1000);
+    }
+
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
   useEffect(() => {
     const unsubscribe = navigation.addListener("tabPress" as never, () => {
       setSearch("");
@@ -657,19 +694,7 @@ export default function DirectoryScreen() {
           setSheetScrollLocked(false);
           reloadNotes();
           resetViewportZoom();
-          // After the modal close animation finishes, restore the list to the
-          // exact scroll position it was at when the user tapped the card.
-          // On web we also reset window scroll in case the body-fixed CSS
-          // wasn't enough to prevent any residual visual-viewport drift.
-          setTimeout(() => {
-            listRef.current?.scrollToOffset({
-              offset: savedScrollOffset.current,
-              animated: false,
-            });
-            if (Platform.OS === "web") {
-              window.scrollTo({ top: 0, left: 0, behavior: "instant" as any });
-            }
-          }, 80);
+          restoreListScroll();
         }}
       />
 
