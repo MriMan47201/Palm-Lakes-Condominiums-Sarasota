@@ -164,7 +164,18 @@ export default function DirectoryScreen() {
 
   const listRef = useRef<FlatList>(null);
   useScrollToTop(listRef);
+  const savedScrollOffset = useRef(0);
+  const [sheetScrollLocked, setSheetScrollLocked] = useState(false);
   const navigation = useNavigation();
+
+  const handleListScroll = useCallback((e: { nativeEvent: { contentOffset: { y: number } } }) => {
+    savedScrollOffset.current = e.nativeEvent.contentOffset.y;
+  }, []);
+
+  const handlePropertyPress = useCallback((property: Property) => {
+    setSheetScrollLocked(true);
+    setSelectedProperty(property);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("tabPress" as never, () => {
@@ -548,12 +559,12 @@ export default function DirectoryScreen() {
     ({ item }: { item: Property }) => (
       <PropertyCard
         property={item}
-        onPress={setSelectedProperty}
+        onPress={handlePropertyPress}
         searchQuery={debouncedSearch}
         showUnit={sortMode === "unit"}
       />
     ),
-    [debouncedSearch, sortMode]
+    [handlePropertyPress, debouncedSearch, sortMode]
   );
 
   const EmptyState = useCallback(() => {
@@ -624,6 +635,9 @@ export default function DirectoryScreen() {
         scrollsToTop
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
+        scrollEnabled={!sheetScrollLocked}
+        onScroll={handleListScroll}
+        scrollEventThrottle={16}
       />
 
       <Pressable
@@ -638,7 +652,25 @@ export default function DirectoryScreen() {
       <PropertyDetailSheet
         property={selectedProperty}
         visible={!!selectedProperty}
-        onClose={() => { setSelectedProperty(null); reloadNotes(); resetViewportZoom(); }}
+        onClose={() => {
+          setSelectedProperty(null);
+          setSheetScrollLocked(false);
+          reloadNotes();
+          resetViewportZoom();
+          // After the modal close animation finishes, restore the list to the
+          // exact scroll position it was at when the user tapped the card.
+          // On web we also reset window scroll in case the body-fixed CSS
+          // wasn't enough to prevent any residual visual-viewport drift.
+          setTimeout(() => {
+            listRef.current?.scrollToOffset({
+              offset: savedScrollOffset.current,
+              animated: false,
+            });
+            if (Platform.OS === "web") {
+              window.scrollTo({ top: 0, left: 0, behavior: "instant" as any });
+            }
+          }, 80);
+        }}
       />
 
       {menuVisible && (
