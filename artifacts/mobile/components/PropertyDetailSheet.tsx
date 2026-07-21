@@ -63,6 +63,24 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
 
   useEffect(() => {
     if (!editing) { setKeyboardHeight(0); return; }
+
+    // On web, RN keyboard listeners always report height=0 (no native bridge).
+    // Use the visualViewport API instead: its height shrinks as the keyboard
+    // animates up, giving us the real keyboard height frame-by-frame so the
+    // modal stays above the keyboard and iOS never needs to pan the page.
+    if (Platform.OS === "web" && typeof window !== "undefined" && window.visualViewport) {
+      const vvp = window.visualViewport;
+      const onResize = () => {
+        const kbH = Math.max(0, window.innerHeight - vvp.height - vvp.offsetTop);
+        setKeyboardHeight(kbH);
+      };
+      vvp.addEventListener("resize", onResize);
+      return () => {
+        vvp.removeEventListener("resize", onResize);
+        setKeyboardHeight(0);
+      };
+    }
+
     const show = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
       (e) => setKeyboardHeight(e.endCoordinates.height)
