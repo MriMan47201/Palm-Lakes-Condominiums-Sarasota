@@ -16,6 +16,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import OfflineBanner from "@/components/OfflineBanner";
+import { useIOSViewportFix } from "@/hooks/useIOSViewportFix";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -43,6 +44,10 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);
+
+  // Keeps the app container correctly sized and scroll position restored
+  // when the iOS on-screen keyboard opens/closes (standalone PWA fix).
+  useIOSViewportFix();
 
   // Register service worker on web only
   useEffect(() => {
