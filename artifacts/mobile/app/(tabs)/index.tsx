@@ -214,6 +214,28 @@ export default function DirectoryScreen() {
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
+  // Persistent keyboard-close detector for the main screen.
+  // When the virtual keyboard dismisses on iOS PWA the visualViewport height
+  // grows back. We treat any upward resize as "keyboard just closed" and snap
+  // the list back to the saved offset — exactly like the notes fix, but always
+  // active so it catches the search-bar keyboard too.
+  useEffect(() => {
+    if (Platform.OS !== "web") return;
+    if (typeof window === "undefined" || !window.visualViewport) return;
+    const vp = window.visualViewport!;
+    let lastHeight = vp.height;
+    const onVpResize = () => {
+      const h = vp.height;
+      if (h > lastHeight) {
+        // Viewport grew → keyboard went away → restore list position
+        restoreListScroll();
+      }
+      lastHeight = h;
+    };
+    vp.addEventListener("resize", onVpResize);
+    return () => vp.removeEventListener("resize", onVpResize);
+  }, [restoreListScroll]);
+
   useEffect(() => {
     const unsubscribe = navigation.addListener("tabPress" as never, () => {
       setSearch("");
