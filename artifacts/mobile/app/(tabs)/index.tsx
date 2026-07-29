@@ -569,6 +569,7 @@ export default function DirectoryScreen() {
           value={search}
           onChangeText={handleSearchChange}
           placeholder="Search owners, addresses, or notes..."
+          onBlur={restoreListScroll}
         />
       </View>
 

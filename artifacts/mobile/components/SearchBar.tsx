@@ -14,22 +14,27 @@ type Props = {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
+  onBlur?: () => void;
 };
 
-export default function SearchBar({ value, onChangeText, placeholder = "Search by name or address..." }: Props) {
+export default function SearchBar({ value, onChangeText, placeholder = "Search by name or address...", onBlur }: Props) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const theme = Colors[isDark ? "dark" : "light"];
 
   const handleBlur = useCallback(() => {
-    if (Platform.OS !== "web") return;
-    const viewport = document.querySelector("meta[name=viewport]") as HTMLMetaElement | null;
-    if (!viewport) return;
-    viewport.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1");
-    setTimeout(() => {
-      viewport.setAttribute("content", "width=device-width, initial-scale=1");
-    }, 50);
-  }, []);
+    if (Platform.OS === "web") {
+      const viewport = document.querySelector("meta[name=viewport]") as HTMLMetaElement | null;
+      if (viewport) {
+        viewport.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1");
+        setTimeout(() => {
+          viewport.setAttribute("content", "width=device-width, initial-scale=1");
+        }, 50);
+      }
+    }
+    // Restore parent scroll position after keyboard dismisses
+    onBlur?.();
+  }, [onBlur]);
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? theme.navyMid : theme.backgroundSecondary, borderColor: theme.separator }]}>
