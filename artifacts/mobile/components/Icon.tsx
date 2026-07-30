@@ -4,7 +4,7 @@ import type { StyleProp, ViewStyle } from "react-native";
 
 export type IconName =
   | "align-left" | "alert-circle" | "check" | "chevron-right"
-  | "grid" | "hash" | "home" | "info" | "map-pin" | "menu"
+  | "grid" | "hash" | "home" | "info" | "map-pin" | "menu" | "pencil"
   | "printer" | "refresh-cw" | "search" | "sliders" | "wifi-off" | "x";
 
 type Props = {
@@ -114,6 +114,10 @@ function renderPaths(name: IconName, color: string) {
         <Circle cx={12} cy={12} r={10} {...p} />
         <Line x1={12} y1={16} x2={12} y2={12} {...p} />
         <Line x1={12} y1={8} x2={12.01} y2={8} {...p} />
+      </>;
+    case "pencil":
+      return <>
+        <Path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" {...p} />
       </>;
     case "printer":
       return <>

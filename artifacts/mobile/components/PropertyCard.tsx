@@ -17,6 +17,7 @@ type Props = {
   onPress?: (property: Property) => void;
   searchQuery?: string;
   showUnit?: boolean;
+  hasNote?: boolean;
 };
 
 function highlightText(text: string, query: string, style: object, highlightStyle: object) {
@@ -37,7 +38,7 @@ function highlightText(text: string, query: string, style: object, highlightStyl
   );
 }
 
-export default function PropertyCard({ property, onPress, searchQuery = "", showUnit = false }: Props) {
+export default function PropertyCard({ property, onPress, searchQuery = "", showUnit = false, hasNote = false }: Props) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const theme = Colors[isDark ? "dark" : "light"];
@@ -132,6 +133,12 @@ export default function PropertyCard({ property, onPress, searchQuery = "", show
           </View>
         ) : null}
       </View>
+
+      {hasNote && (
+        <View style={styles.noteIndicator}>
+          <Icon name="pencil" size={12} color={theme.tint} />
+        </View>
+      )}
 
       <View style={styles.arrow}>
         <Icon name="chevron-right" size={16} color={theme.textMuted} />
@@ -230,5 +237,11 @@ const styles = StyleSheet.create({
   arrow: {
     paddingRight: 12,
     justifyContent: "center",
+  },
+  noteIndicator: {
+    position: "absolute",
+    bottom: 8,
+    right: 38,
+    opacity: 0.8,
   },
 });

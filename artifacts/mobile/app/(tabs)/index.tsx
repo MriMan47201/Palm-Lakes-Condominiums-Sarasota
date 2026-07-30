@@ -622,9 +622,10 @@ export default function DirectoryScreen() {
         onPress={handlePropertyPress}
         searchQuery={debouncedSearch}
         showUnit={sortMode === "unit"}
+        hasNote={!!allNotes[item.address]}
       />
     ),
-    [handlePropertyPress, debouncedSearch, sortMode]
+    [handlePropertyPress, debouncedSearch, sortMode, allNotes]
   );
 
   const EmptyState = useCallback(() => {
