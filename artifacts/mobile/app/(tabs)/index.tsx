@@ -573,7 +573,7 @@ export default function DirectoryScreen() {
                 Sarasota, FL 34243
               </Text>
               <Text style={[styles.headerSubtitle, { color: "rgba(255,255,255,0.80)", fontFamily: "Inter_400Regular" }]}>
-                v1.0
+                v1.2
               </Text>
             </View>
           </View>
