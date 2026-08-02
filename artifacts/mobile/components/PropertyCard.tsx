@@ -1,5 +1,4 @@
 import Icon from "./Icon";
-import PalmFrondWatermark from "./PalmFrondWatermark";
 import StickFigureIcon from "./StickFigureIcon";
 import React from "react";
 import {
@@ -48,22 +47,19 @@ export default function PropertyCard({ property, onPress, searchQuery = "", show
   const streetNumber = addressParts[0] || "";
   const streetName = addressParts.slice(1).join(" ") || "";
 
-  // Frond color: slightly darker than card bg, same hue family
-  const frondColor = isDark ? theme.navyLight + "60" : "#C8BDA8";
-
   return (
     <Pressable
       onPress={() => onPress?.(property)}
       style={({ pressed }) => [
         styles.card,
         Platform.select({
-          web: { boxShadow: `0px 3px 12px ${theme.shadow}, 0px 1px 3px ${theme.shadow}` } as any,
+          web: { boxShadow: `0px 4px 16px ${theme.shadow}, 0px 1px 4px ${theme.shadow}` } as any,
           default: {
-            shadowColor: theme.shadow,
-            shadowOffset: { width: 0, height: 3 },
-            shadowOpacity: 1,
-            shadowRadius: 12,
-            elevation: 4,
+            shadowColor: isDark ? "#000" : "rgba(20,50,45,1)",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: isDark ? 0.45 : 0.13,
+            shadowRadius: 14,
+            elevation: 6,
           },
         }),
         {
@@ -73,11 +69,6 @@ export default function PropertyCard({ property, onPress, searchQuery = "", show
         },
       ]}
     >
-      {/* Palm frond watermark — bottom-right decorative element */}
-      <View style={styles.watermark} pointerEvents="none">
-        <PalmFrondWatermark color={frondColor} size={115} />
-      </View>
-
       <View style={[styles.accentBar, { backgroundColor: theme.tint }]} />
 
       <View style={styles.content}>
@@ -174,12 +165,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "stretch",
     overflow: "hidden",
-  },
-  watermark: {
-    position: "absolute",
-    bottom: -12,
-    right: 30,
-    opacity: 0.85,
   },
   accentBar: {
     width: 4,
