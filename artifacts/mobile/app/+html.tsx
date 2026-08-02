@@ -26,7 +26,7 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="apple-mobile-web-app-title" content="Palm Lakes" />
 
         {/* Theme colour for Android Chrome tab bar */}
-        <meta name="theme-color" content="#073B4C" />
+        <meta name="theme-color" content="#1A7A74" />
 
         {/* Suppress the default body margin Expo adds on web */}
         <ScrollViewStyleReset />

@@ -151,7 +151,7 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
           <Pressable style={styles.noteModalBackdrop} onPress={handleClose} />
           <View
             style={[styles.noteModal, {
-              backgroundColor: isDark ? "#0F1B2E" : "#fff",
+              backgroundColor: isDark ? "#0F1B2E" : "#FAF7F0",
               borderColor: theme.separator,
               marginBottom: keyboardHeight + 16,
             }]}

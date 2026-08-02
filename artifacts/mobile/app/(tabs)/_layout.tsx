@@ -51,7 +51,7 @@ export default function TabLayout() {
         tabBarHideOnKeyboard: true,
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: isIOS ? "transparent" : isDark ? "#0F1B2E" : "#fff",
+          backgroundColor: isIOS ? "transparent" : isDark ? "#0F1B2E" : "#F5F0E8",
           borderTopWidth: isWeb ? 1 : 0,
           borderTopColor: theme.separator,
           elevation: 0,
@@ -69,7 +69,7 @@ export default function TabLayout() {
             <View
               style={[
                 StyleSheet.absoluteFill,
-                { backgroundColor: isDark ? "#0F1B2E" : "#fff" },
+                { backgroundColor: isDark ? "#0F1B2E" : "#F5F0E8" },
               ]}
             />
           ) : null,

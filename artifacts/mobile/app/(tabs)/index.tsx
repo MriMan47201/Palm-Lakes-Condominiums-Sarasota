@@ -554,7 +554,7 @@ export default function DirectoryScreen() {
         resizeMode="cover"
       >
         <LinearGradient
-          colors={["transparent", "rgba(7,59,76,0.55)", "rgba(7,59,76,0.88)"]}
+          colors={["transparent", "rgba(12,56,53,0.55)", "rgba(12,56,53,0.92)"]}
           locations={[0.0, 0.5, 1.0]}
           style={[styles.headerOverlay, { paddingTop: stableTop + 24 }]}
         >
@@ -595,12 +595,12 @@ export default function DirectoryScreen() {
         />
       </View>
 
-      <View style={[styles.sortBar, { backgroundColor: theme.tint + "18", borderColor: theme.tint + "40" }]}>
-        <Icon name="sliders" size={13} color={theme.tint} />
-        <Text style={[styles.sortBarLabel, { color: theme.textSecondary, fontFamily: "Inter_400Regular" }]}>
+      <View style={[styles.sortBar, { backgroundColor: theme.tint, borderColor: theme.tint }]}>
+        <Icon name="sliders" size={13} color="rgba(255,255,255,0.85)" />
+        <Text style={[styles.sortBarLabel, { color: "rgba(255,255,255,0.75)", fontFamily: "Inter_400Regular" }]}>
           Sort:
         </Text>
-        <Text style={[styles.sortBarValue, { color: theme.tint, fontFamily: "Inter_700Bold" }]}>
+        <Text style={[styles.sortBarValue, { color: "#fff", fontFamily: "Inter_700Bold" }]}>
           {SORT_OPTIONS.find((o) => o.mode === sortMode)?.label ?? ""}
         </Text>
       </View>
@@ -736,7 +736,7 @@ export default function DirectoryScreen() {
             style={[
               styles.menuPanel,
               {
-                backgroundColor: isDark ? theme.backgroundSecondary : "#FFFAF4",
+                backgroundColor: isDark ? theme.backgroundSecondary : "#F5F0E8",
                 borderLeftColor: theme.separator,
                 paddingTop: stableTop + 16,
               },

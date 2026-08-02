@@ -1,4 +1,5 @@
 import Icon from "./Icon";
+import PalmFrondWatermark from "./PalmFrondWatermark";
 import StickFigureIcon from "./StickFigureIcon";
 import React from "react";
 import {
@@ -47,34 +48,50 @@ export default function PropertyCard({ property, onPress, searchQuery = "", show
   const streetNumber = addressParts[0] || "";
   const streetName = addressParts.slice(1).join(" ") || "";
 
+  // Frond color: slightly darker than card bg, same hue family
+  const frondColor = isDark ? theme.navyLight + "60" : "#C8BDA8";
+
   return (
     <Pressable
       onPress={() => onPress?.(property)}
       style={({ pressed }) => [
         styles.card,
         Platform.select({
-          web: { boxShadow: `0px 2px 8px ${theme.shadow}` } as any,
+          web: { boxShadow: `0px 3px 12px ${theme.shadow}, 0px 1px 3px ${theme.shadow}` } as any,
           default: {
             shadowColor: theme.shadow,
-            shadowOffset: { width: 0, height: 2 },
+            shadowOffset: { width: 0, height: 3 },
             shadowOpacity: 1,
-            shadowRadius: 8,
-            elevation: 3,
+            shadowRadius: 12,
+            elevation: 4,
           },
         }),
         {
           backgroundColor: theme.card,
-          opacity: pressed ? 0.92 : 1,
-          transform: [{ scale: pressed ? 0.985 : 1 }],
+          opacity: pressed ? 0.93 : 1,
+          transform: [{ scale: pressed ? 0.984 : 1 }],
         },
       ]}
     >
+      {/* Palm frond watermark — bottom-right decorative element */}
+      <View style={styles.watermark} pointerEvents="none">
+        <PalmFrondWatermark color={frondColor} size={115} />
+      </View>
+
       <View style={[styles.accentBar, { backgroundColor: theme.tint }]} />
 
       <View style={styles.content}>
+        {/* Address row */}
         <View style={styles.addressRow}>
-          <View style={[styles.numberBadge, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary }]}>
-            <Text style={[styles.numberText, { color: isDark ? theme.tintLight : theme.tint, fontFamily: "Inter_700Bold" }]}>
+          {/* Outlined teal badge matching reference design */}
+          <View style={[
+            styles.numberBadge,
+            {
+              borderColor: theme.tint,
+              backgroundColor: isDark ? theme.tint + "22" : "transparent",
+            },
+          ]}>
+            <Text style={[styles.numberText, { color: theme.tint, fontFamily: "Inter_700Bold" }]}>
               {streetNumber}
             </Text>
           </View>
@@ -83,8 +100,8 @@ export default function PropertyCard({ property, onPress, searchQuery = "", show
               {highlightText(
                 streetName,
                 searchQuery,
-                [styles.streetName, { color: theme.text, fontFamily: "Inter_600SemiBold" }],
-                { backgroundColor: theme.tint + "44", borderRadius: 2 }
+                [styles.streetName, { color: theme.text, fontFamily: "Inter_700Bold" }],
+                { backgroundColor: theme.tint + "33", borderRadius: 2 }
               )}
               {showUnit && property.lotNumber && /^\d+$/.test(property.lotNumber.trim()) ? (
                 <Text style={[styles.unitNumber, { fontFamily: "Inter_700Bold" }]}>
@@ -100,18 +117,20 @@ export default function PropertyCard({ property, onPress, searchQuery = "", show
 
         <View style={[styles.divider, { backgroundColor: theme.separator }]} />
 
+        {/* Owner row */}
         <View style={styles.ownerRow}>
-          <View style={[styles.ownerIcon, { backgroundColor: (isDark ? theme.tintLight : theme.tint) + "22" }]}>
+          <View style={[styles.ownerIcon, { backgroundColor: (isDark ? theme.tintLight : theme.tint) + "1E" }]}>
             <StickFigureIcon size={16} color={isDark ? theme.tintLight : theme.tint} />
           </View>
           {highlightText(
             property.ownerName,
             searchQuery,
             [styles.ownerName, { color: theme.text, fontFamily: "Inter_500Medium" }],
-            { backgroundColor: theme.tint + "44", borderRadius: 2 }
+            { backgroundColor: theme.tint + "33", borderRadius: 2 }
           )}
         </View>
 
+        {/* Value chips */}
         {(property.totalValue || property.landValue) ? (
           <View style={styles.valueRow}>
             {property.totalValue ? (
@@ -149,12 +168,18 @@ export default function PropertyCard({ property, onPress, searchQuery = "", show
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 12,
+    borderRadius: 14,
     marginHorizontal: 16,
     marginVertical: 5,
     flexDirection: "row",
     alignItems: "stretch",
     overflow: "hidden",
+  },
+  watermark: {
+    position: "absolute",
+    bottom: -12,
+    right: 30,
+    opacity: 0.85,
   },
   accentBar: {
     width: 4,
@@ -171,9 +196,10 @@ const styles = StyleSheet.create({
   },
   numberBadge: {
     borderRadius: 9,
+    borderWidth: 1.5,
     paddingHorizontal: 9,
     paddingVertical: 5,
-    minWidth: 48,
+    minWidth: 50,
     alignItems: "center",
   },
   numberText: {
@@ -191,6 +217,7 @@ const styles = StyleSheet.create({
   streetName: {
     fontSize: 15,
     flex: 1,
+    letterSpacing: 0.1,
   },
   cityState: {
     fontSize: 12,
@@ -242,6 +269,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 8,
     right: 38,
-    opacity: 0.8,
+    opacity: 0.85,
   },
 });
