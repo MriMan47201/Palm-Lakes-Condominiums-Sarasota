@@ -40,7 +40,9 @@ export default function SyncStatus({ syncInfo, isSyncing, onSync }: Props) {
 
   const lastSyncAt = syncInfo?.lastSyncAt ?? null;
   const lastSyncText = formatTimeAgo(lastSyncAt);
-  const count = syncInfo?.count ?? 0;
+  const rawCount = syncInfo?.count ?? 0;
+  // Subtract the 2 HOA-owned properties (Clubhouse + Lift Station)
+  const count = rawCount > 2 ? rawCount - 2 : rawCount;
 
   const tooRecent = lastSyncAt
     ? Date.now() - new Date(lastSyncAt).getTime() < MIN_SYNC_AGE_MS
