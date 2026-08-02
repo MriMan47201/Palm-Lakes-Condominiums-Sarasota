@@ -108,7 +108,7 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
     setEditing(false);
   };
 
-  const inputBg = isDark ? theme.navyMid : theme.backgroundTertiary;
+  const inputBg = isDark ? theme.navyMid : "#D5EDFA";
   const borderColor = theme.separator;
 
   return (
@@ -151,7 +151,7 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
           <Pressable style={styles.noteModalBackdrop} onPress={handleClose} />
           <View
             style={[styles.noteModal, {
-              backgroundColor: isDark ? "#0F1B2E" : "#FAF7F0",
+              backgroundColor: isDark ? "#0F1B2E" : "#EBF7FF",
               borderColor: theme.separator,
               marginBottom: keyboardHeight + 16,
             }]}
@@ -190,7 +190,7 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
             <View style={styles.noteModalActions}>
               <Pressable
                 onPress={handleClose}
-                style={[styles.noteBtn, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary, borderColor: theme.separator }]}
+                style={[styles.noteBtn, { backgroundColor: isDark ? theme.navyMid : "#D5EDFA", borderColor: isDark ? theme.separator : "#B8D9EE" }]}
               >
                 <Text style={[styles.noteBtnText, { color: theme.text, fontFamily: "Inter_500Medium" }]}>Cancel</Text>
               </Pressable>
@@ -238,8 +238,12 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
             {
               width: Math.min(screenWidth - 32, 480),
               maxHeight: screenHeight * 0.82,
-              backgroundColor: theme.backgroundSecondary,
+              backgroundColor: isDark ? theme.backgroundSecondary : "#EBF7FF",
               paddingBottom: insets.bottom + 8,
+              ...Platform.select({
+                web: { boxShadow: "0px 16px 48px rgba(0,0,0,0.28), 0px 4px 14px rgba(0,0,0,0.16)" } as any,
+                default: {},
+              }),
             },
           ]}
         >
@@ -260,7 +264,7 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
             </View>
             <Pressable
               onPress={onClose}
-              style={[styles.closeBtn, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary }]}
+              style={[styles.closeBtn, { backgroundColor: isDark ? theme.navyMid : "#D5EDFA" }]}
               hitSlop={8}
             >
               <Text style={{ fontSize: 18, color: theme.text, lineHeight: 18 }}>✕</Text>
@@ -277,7 +281,7 @@ export default function PropertyDetailSheet({ property, visible, onClose }: Prop
               PROPERTY DETAILS
             </Text>
 
-            <View style={[styles.detailsCard, { backgroundColor: isDark ? theme.navyMid : theme.backgroundTertiary, borderColor: theme.separator }]}>
+            <View style={[styles.detailsCard, { backgroundColor: isDark ? theme.navyMid : "#D5EDFA", borderColor: isDark ? theme.separator : "#B8D9EE" }]}>
               <DetailRow label="Owner" value={property.ownerName} icon="person" />
               <DetailRow label="Parcel ID" value={property.parcelId} icon="hash" />
               {mailingIsDifferent && (
@@ -310,10 +314,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 24,
-    elevation: 16,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.32,
+    shadowRadius: 32,
+    elevation: 24,
   },
   header: {
     flexDirection: "row",
