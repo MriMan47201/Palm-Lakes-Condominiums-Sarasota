@@ -74,15 +74,15 @@ export default function PropertyCard({ property, onPress, searchQuery = "", show
       <View style={styles.content}>
         {/* Address row */}
         <View style={styles.addressRow}>
-          {/* Outlined teal badge matching reference design */}
+          {/* Light-blue filled badge — darker blue text on light blue background */}
           <View style={[
             styles.numberBadge,
             {
-              borderColor: theme.tint,
-              backgroundColor: isDark ? theme.tint + "22" : "transparent",
+              borderColor: "transparent",
+              backgroundColor: isDark ? theme.navyMid : "#DDEFFA",
             },
           ]}>
-            <Text style={[styles.numberText, { color: theme.tint, fontFamily: "Inter_700Bold" }]}>
+            <Text style={[styles.numberText, { color: isDark ? theme.tintLight : "#0891B2", fontFamily: "Inter_700Bold" }]}>
               {streetNumber}
             </Text>
           </View>
