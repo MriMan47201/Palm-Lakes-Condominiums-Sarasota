@@ -122,7 +122,7 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
         style={[styles.notesPreview, { backgroundColor: inputBg, borderColor }]}
       >
         <View style={styles.notesPreviewInner}>
-          <Text style={[styles.notesIcon, { fontSize: 13, color: theme.textMuted }]}>✏</Text>
+          <Text style={[styles.notesIcon, { fontSize: 16 }]}>✏️</Text>
           {loaded && note.length > 0 ? (
             <Text
               style={[styles.notesPreviewText, { color: theme.text, fontFamily: "Inter_400Regular" }]}
