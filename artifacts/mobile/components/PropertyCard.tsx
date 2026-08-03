@@ -79,10 +79,10 @@ export default function PropertyCard({ property, onPress, searchQuery = "", show
             styles.numberBadge,
             {
               borderColor: "transparent",
-              backgroundColor: isDark ? theme.navyMid : "#C8E8E4",
+              backgroundColor: isDark ? theme.navyMid : "#D5EDFA",
             },
           ]}>
-            <Text style={[styles.numberText, { color: isDark ? theme.tintLight : "#0F6460", fontFamily: "Inter_700Bold" }]}>
+            <Text style={[styles.numberText, { color: isDark ? theme.tintLight : "#0F5278", fontFamily: "Inter_700Bold" }]}>
               {streetNumber}
             </Text>
           </View>
