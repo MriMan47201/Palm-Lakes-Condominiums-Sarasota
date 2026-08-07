@@ -685,7 +685,7 @@ export default function DirectoryScreen() {
         ListEmptyComponent={EmptyState}
         contentInsetAdjustmentBehavior="never"
         contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 80 }]}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={Platform.OS === "web"}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -753,7 +753,7 @@ export default function DirectoryScreen() {
             <ScrollView
               style={styles.menuScroll}
               contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
-              showsVerticalScrollIndicator={false}
+              showsVerticalScrollIndicator={Platform.OS === "web"}
               keyboardShouldPersistTaps="handled"
             >
 
