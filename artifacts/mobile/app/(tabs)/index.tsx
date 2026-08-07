@@ -675,7 +675,7 @@ export default function DirectoryScreen() {
   });
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingBottom: Platform.OS === "web" ? 72 : 0 }]}>
       <FlatList
         ref={listRef}
         data={sortedProperties}
