@@ -226,6 +226,10 @@ async function doFetchAndCache(): Promise<SyncResult> {
 
 // ── Auto-sync (startup): no throttle, only checks 24 h staleness ──────────────
 async function autoSyncIfStale(): Promise<void> {
+  // Skip immediately if the device reports as offline — avoids triggering the
+  // iOS "Turn Off Airplane Mode" system banner for a fetch that will fail anyway.
+  if (typeof navigator !== "undefined" && !navigator.onLine) return;
+
   const info = await readSyncInfo();
   const isStale = !info.lastSyncAt || (Date.now() - new Date(info.lastSyncAt).getTime() > MAX_AGE_MS);
   const isEmpty = (await readCachedProperties()).length === 0;
