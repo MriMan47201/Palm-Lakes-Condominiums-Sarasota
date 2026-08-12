@@ -30,6 +30,8 @@ import SyncStatus from "@/components/SyncStatus";
 import PropertyDetailSheet from "@/components/PropertyDetailSheet";
 import { useProperties, useSyncInfo, useSyncProperties, type Property } from "@/hooks/useApi";
 import { useAllNotes } from "@/hooks/useNotes";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import OfflineBanner from "@/components/OfflineBanner";
 
 // Alert.alert() is a no-op stub on the web target of react-native-web, so
 // any Alert.alert() call silently does nothing there (no error, no popup).
@@ -168,8 +170,26 @@ export default function DirectoryScreen() {
   const [sheetScrollLocked, setSheetScrollLocked] = useState(false);
   const navigation = useNavigation();
 
+  // ── Offline banner scroll-dismiss tracking ────────────────────────────────
+  const isOnline = useOnlineStatus();
+  const [bannerScrolled, setBannerScrolled] = useState(false);
+  const scrolledWhileOffline = useRef(false);
+  // Reset the scroll flag each time we transition to offline so the banner
+  // gets a fresh chance to show before the user scrolls again.
+  useEffect(() => {
+    if (!isOnline) {
+      scrolledWhileOffline.current = false;
+      setBannerScrolled(false);
+    }
+  }, [isOnline]);
+
   const handleListScroll = useCallback((e: { nativeEvent: { contentOffset: { y: number } } }) => {
     savedScrollOffset.current = e.nativeEvent.contentOffset.y;
+    // Signal the offline banner to dismiss on first scroll (fires once per offline period)
+    if (!scrolledWhileOffline.current) {
+      scrolledWhileOffline.current = true;
+      setBannerScrolled(true);
+    }
   }, []);
 
   const handlePropertyPress = useCallback((property: Property) => {
@@ -860,6 +880,8 @@ export default function DirectoryScreen() {
           </Animated.View>
         </View>
       )}
+
+      <OfflineBanner scrolled={bannerScrolled} />
     </View>
   );
 }

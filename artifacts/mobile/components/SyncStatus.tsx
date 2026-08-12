@@ -3,6 +3,7 @@ import React from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
 import Colors from "@/constants/colors";
 import type { SyncInfo } from "@/hooks/useApi";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 type Props = {
   syncInfo?: SyncInfo;
@@ -44,10 +45,12 @@ export default function SyncStatus({ syncInfo, isSyncing, onSync }: Props) {
   // Subtract the 2 HOA-owned properties (Clubhouse + Lift Station)
   const count = rawCount > 2 ? rawCount - 2 : rawCount;
 
+  const isOnline = useOnlineStatus();
+
   const tooRecent = lastSyncAt
     ? Date.now() - new Date(lastSyncAt).getTime() < MIN_SYNC_AGE_MS
     : false;
-  const syncDisabled = isSyncing || tooRecent;
+  const syncDisabled = isSyncing || tooRecent || !isOnline;
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? theme.navyMid : theme.backgroundSecondary, borderColor: theme.separator }]}>

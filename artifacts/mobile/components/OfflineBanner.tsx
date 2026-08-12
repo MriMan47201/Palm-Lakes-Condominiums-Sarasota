@@ -1,20 +1,56 @@
 import Icon from "./Icon";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Animated, Platform, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 const TAB_BAR_HEIGHT = 49;
+const SUPPRESS_MS = 10 * 60 * 1000; // 10 minutes
 
-export default function OfflineBanner() {
+type Props = {
+  /** Set to true the first time the user scrolls after the banner appeared. */
+  scrolled?: boolean;
+};
+
+export default function OfflineBanner({ scrolled = false }: Props) {
   const isOnline = useOnlineStatus();
   const insets = useSafeAreaInsets();
   const translateY = useRef(new Animated.Value(120)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
+  // Suppression: dismissed by scroll, auto-lifts after SUPPRESS_MS
+  const [suppressed, setSuppressed] = useState(false);
+  const suppressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Dismiss + start 10-min timer when the user scrolls while banner is showing
   useEffect(() => {
-    if (!isOnline) {
-      // Slide up and fade in when offline
+    if (scrolled && !isOnline && !suppressed) {
+      setSuppressed(true);
+      if (suppressTimer.current) clearTimeout(suppressTimer.current);
+      suppressTimer.current = setTimeout(() => setSuppressed(false), SUPPRESS_MS);
+    }
+  }, [scrolled, isOnline, suppressed]);
+
+  // Clear suppression when connectivity is restored so it can reappear next offline period
+  useEffect(() => {
+    if (isOnline) {
+      setSuppressed(false);
+      if (suppressTimer.current) {
+        clearTimeout(suppressTimer.current);
+        suppressTimer.current = null;
+      }
+    }
+  }, [isOnline]);
+
+  // Clean up timer on unmount
+  useEffect(() => () => {
+    if (suppressTimer.current) clearTimeout(suppressTimer.current);
+  }, []);
+
+  const visible = !isOnline && !suppressed;
+
+  useEffect(() => {
+    if (visible) {
       Animated.parallel([
         Animated.spring(translateY, {
           toValue: 0,
@@ -29,7 +65,6 @@ export default function OfflineBanner() {
         }),
       ]).start();
     } else {
-      // Slide down and fade out when back online
       Animated.parallel([
         Animated.timing(translateY, {
           toValue: 120,
@@ -43,7 +78,7 @@ export default function OfflineBanner() {
         }),
       ]).start();
     }
-  }, [isOnline, translateY, opacity]);
+  }, [visible, translateY, opacity]);
 
   // Only render on web — native uses OS-level connectivity UI
   if (Platform.OS !== "web") return null;

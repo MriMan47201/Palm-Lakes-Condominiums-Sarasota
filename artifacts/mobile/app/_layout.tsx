@@ -15,7 +15,6 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import OfflineBanner from "@/components/OfflineBanner";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -74,7 +73,6 @@ export default function RootLayout() {
           <GestureHandlerRootView>
             <KeyboardProvider>
               <RootLayoutNav />
-              <OfflineBanner />
             </KeyboardProvider>
           </GestureHandlerRootView>
         </QueryClientProvider>
