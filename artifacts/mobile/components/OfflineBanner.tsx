@@ -61,8 +61,8 @@ export default function OfflineBanner() {
       <View style={styles.banner}>
         <Icon name="wifi-off" size={15} color="#FFE880" style={styles.icon} />
         <Text style={styles.text}>
-          No connection — directory is available from cached data. Notes save
-          locally and will sync automatically when reconnected.
+          No connection — directory is available from cached data. Notes are
+          stored on this device only.
         </Text>
       </View>
     </Animated.View>
