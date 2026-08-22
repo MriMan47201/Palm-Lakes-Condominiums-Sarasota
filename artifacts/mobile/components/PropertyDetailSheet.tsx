@@ -125,14 +125,28 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
           <Text style={[styles.notesIcon, { fontSize: 16 }]}>✏️</Text>
           {loaded && note.length > 0 ? (
             <Text
-              style={[styles.notesPreviewText, { color: theme.text, fontFamily: "Inter_400Regular" }]}
+              style={[
+                styles.notesPreviewText,
+                { color: theme.text, fontFamily: "Inter_400Regular" },
+                Platform.OS === "web"
+                  ? ({ overflowWrap: "anywhere", wordBreak: "break-word" } as any)
+                  : null,
+              ]}
               numberOfLines={3}
             >
               {note}
             </Text>
           ) : (
             <>
-              <Text style={[styles.notesPlaceholder, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+              <Text
+                style={[
+                  styles.notesPlaceholder,
+                  { color: theme.textMuted, fontFamily: "Inter_400Regular" },
+                  Platform.OS === "web"
+                    ? ({ overflowWrap: "anywhere", wordBreak: "break-word" } as any)
+                    : null,
+                ]}
+              >
                 Tap to add a note…
               </Text>
               <Text style={[styles.notesPlaceholder, { color: "transparent", fontFamily: "Inter_400Regular" }]}>{"\n\n"}</Text>
@@ -174,6 +188,9 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
                   borderColor,
                   fontFamily: "Inter_400Regular",
                 },
+                Platform.OS === "web"
+                  ? ({ overflowWrap: "anywhere", wordBreak: "break-word" } as any)
+                  : null,
               ]}
               value={draft}
               onChangeText={handleChange}
@@ -403,17 +420,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 8,
+    width: "100%",
+    minWidth: 0,
   },
   notesIcon: {
     marginTop: 2,
   },
   notesPreviewText: {
     flex: 1,
+    minWidth: 0,
+    maxWidth: "100%",
+    flexShrink: 1,
     fontSize: 14,
     lineHeight: 22,
   },
   notesPlaceholder: {
     flex: 1,
+    minWidth: 0,
+    maxWidth: "100%",
+    flexShrink: 1,
     fontSize: 14,
     lineHeight: 22,
     fontStyle: "italic",
@@ -454,6 +479,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     padding: 12,
+    minWidth: 0,
     fontSize: 16,
     lineHeight: 22,
     minHeight: 120,
