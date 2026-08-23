@@ -875,6 +875,9 @@ export default function DirectoryScreen() {
               <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
                 Public data sourced from Manatee County GIS
               </Text>
+              <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+                Your notes are saved locally, never shared.
+              </Text>
             </View>
             </ScrollView>
           </Animated.View>
