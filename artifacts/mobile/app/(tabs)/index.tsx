@@ -916,10 +916,10 @@ export default function DirectoryScreen() {
                 Steven Low  ·  © 2026
               </Text>
               <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
-                Public data sourced from Manatee County GIS
+                • Public data sourced from Manatee County GIS
               </Text>
               <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
-                Your notes are saved locally, never shared.
+                • Your notes are saved locally, never shared.
               </Text>
             </View>
             </ScrollView>
