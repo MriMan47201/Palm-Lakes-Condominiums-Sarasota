@@ -913,10 +913,7 @@ export default function DirectoryScreen() {
 
             <View style={styles.menuAbout}>
               <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
-                Steven Low
-              </Text>
-              <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
-                © 2026
+                Steven Low  ·  © 2026
               </Text>
               <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
                 Public data sourced from Manatee County GIS
