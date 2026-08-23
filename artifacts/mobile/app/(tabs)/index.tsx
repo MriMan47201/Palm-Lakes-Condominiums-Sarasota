@@ -1061,6 +1061,15 @@ const styles = StyleSheet.create({
   },
   menuScroll: {
     flex: 1,
+    minHeight: 0,
+    ...Platform.select({
+      web: {
+        overflowY: "auto",
+        overflowX: "hidden",
+        scrollbarWidth: "auto",
+      } as any,
+      default: {},
+    }),
   },
   menuCloseRow: {
     flexDirection: "row",
