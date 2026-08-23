@@ -85,11 +85,12 @@ router.post("/properties/sync", async (req, res) => {
       if (age < MIN_SYNC_AGE_MS) {
         const remainingMs = MIN_SYNC_AGE_MS - age;
         const remainingMins = Math.ceil(remainingMs / 60000);
-        return res.status(429).json({
+        res.status(429).json({
           success: false,
           message: `Sync is available once every 4 hours. Try again in ${remainingMins} minute${remainingMins !== 1 ? "s" : ""}.`,
           retryAfterMs: remainingMs,
         });
+        return;
       }
     }
 

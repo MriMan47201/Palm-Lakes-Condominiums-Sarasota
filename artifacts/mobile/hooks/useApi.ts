@@ -225,17 +225,17 @@ async function doFetchAndCache(): Promise<SyncResult> {
 }
 
 // ── Auto-sync (startup): no throttle, only checks 24 h staleness ──────────────
-async function autoSyncIfStale(): Promise<void> {
+async function autoSyncIfStale(cachedProperties: Property[], info: SyncInfo): Promise<boolean> {
   // Skip immediately if the device reports as offline — avoids triggering the
   // iOS "Turn Off Airplane Mode" system banner for a fetch that will fail anyway.
-  if (typeof navigator !== "undefined" && !navigator.onLine) return;
+  if (typeof navigator !== "undefined" && !navigator.onLine) return false;
 
-  const info = await readSyncInfo();
   const isStale = !info.lastSyncAt || (Date.now() - new Date(info.lastSyncAt).getTime() > MAX_AGE_MS);
-  const isEmpty = (await readCachedProperties()).length === 0;
-  if (isStale || isEmpty) {
+  if (isStale || cachedProperties.length === 0) {
     await doFetchAndCache(); // fire-and-forget, error handled inside
+    return true;
   }
+  return false;
 }
 
 // ── Manual sync (Sync Now): enforces 4 h throttle ─────────────────────────────
@@ -264,8 +264,12 @@ export function useProperties(params: { search?: string; page?: number; limit?: 
     queryKey: ["properties", params],
     queryFn: async () => {
       // Auto-sync if stale; on error the cached data is unchanged
-      await autoSyncIfStale();
-      const properties = await readCachedProperties();
+      const [cachedProperties, syncInfo] = await Promise.all([
+        readCachedProperties(),
+        readSyncInfo(),
+      ]);
+      const didSync = await autoSyncIfStale(cachedProperties, syncInfo);
+      const properties = didSync ? await readCachedProperties() : cachedProperties;
       return {
         properties,
         total: properties.length,

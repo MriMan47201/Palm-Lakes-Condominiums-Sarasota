@@ -10,6 +10,11 @@ const LABEL_OVERRIDES: Record<string, string> = {
 const GIS_BASE =
   "https://gis.manateepao.gov/arcgis/rest/services/Website/WebLayers/MapServer/0/query";
 
+type GISResponse = {
+  error?: { message?: string };
+  features?: Array<{ attributes: Record<string, string | null> }>;
+};
+
 const PINNED_ENTRIES = [
   {
     parcelId: "2029601009",
@@ -46,10 +51,14 @@ export async function fetchFromManateeGIS() {
       return { success: false, properties: [], message: `GIS HTTP ${response.status}` };
     }
 
-    const data = await response.json();
+    const data = await response.json() as GISResponse;
 
     if (data.error) {
-      return { success: false, properties: [], message: `GIS error: ${data.error.message}` };
+      return {
+        success: false,
+        properties: [],
+        message: `GIS error: ${data.error.message ?? "Unknown GIS error"}`,
+      };
     }
 
     if (!Array.isArray(data.features) || data.features.length === 0) {
@@ -57,7 +66,7 @@ export async function fetchFromManateeGIS() {
     }
 
     const properties = data.features
-      .map((f: { attributes: Record<string, string | null> }) => {
+      .map((f) => {
         const a = f.attributes;
         const owner1 = (a.PAR_OWNER_NAME1 || "").trim();
         const owner2 = (a.PAR_OWNER_NAME2 || "").trim();
