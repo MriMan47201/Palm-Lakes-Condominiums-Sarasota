@@ -18,6 +18,7 @@ import {
   useColorScheme,
   RefreshControl,
   Alert,
+  Linking,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Print from "expo-print";
@@ -553,6 +554,17 @@ export default function DirectoryScreen() {
     }
   }, [allProperties, allNotes]);
 
+  const handleOpenInstructions = useCallback(() => {
+    const instructionsUrl =
+      Platform.OS === "web" && typeof window !== "undefined"
+        ? new URL("/Instructions.pdf", window.location.origin).toString()
+        : "https://plcdirectory.netlify.app/Instructions.pdf";
+
+    Linking.openURL(instructionsUrl).catch(() => {
+      notify("Unable to Open Instructions", "Please try again.");
+    });
+  }, []);
+
   const handleSync = useCallback(async () => {
     try {
       const result = await syncMutation.mutateAsync();
@@ -854,6 +866,40 @@ export default function DirectoryScreen() {
                     { color: theme.text, fontFamily: "Inter_600SemiBold" },
                   ]}>
                     Print all saved notes
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
+
+            {/* ── HELP section ── */}
+            <View style={[styles.menuSectionDivider, { backgroundColor: theme.separator }]} />
+            <Text style={[styles.menuSectionLabel, { color: theme.tint, fontFamily: "Inter_700Bold" }]}>
+              Help
+            </Text>
+
+            <View style={styles.menuOptions}>
+              <Pressable
+                onPress={() => { closeMenu(); handleOpenInstructions(); }}
+                style={({ pressed }) => [
+                  styles.menuOption,
+                  {
+                    backgroundColor: pressed ? theme.backgroundTertiary : "transparent",
+                    borderColor: "transparent",
+                  },
+                ]}
+              >
+                <View style={[styles.menuOptionIcon, { backgroundColor: theme.backgroundTertiary }]}>
+                  <Icon name="info" size={14} color={theme.textMuted} />
+                </View>
+                <View style={styles.menuOptionText}>
+                  <Text style={[
+                    styles.menuOptionLabel,
+                    { color: theme.text, fontFamily: "Inter_600SemiBold" },
+                  ]}>
+                    Instructions
+                  </Text>
+                  <Text style={[styles.menuOptionSub, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+                    How to use the Owner Directory
                   </Text>
                 </View>
               </Pressable>
