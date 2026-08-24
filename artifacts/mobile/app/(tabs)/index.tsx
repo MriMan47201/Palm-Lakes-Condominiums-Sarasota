@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Animated,
   FlatList,
+  Image,
   ImageBackground,
   Keyboard,
   Platform,
@@ -47,6 +48,7 @@ const notify = (title: string, message?: string) => {
 };
 
 const ENTRANCE_IMAGE = require("../../assets/images/main-entrance.jpg");
+const APP_ICON = require("../../assets/images/icon.png");
 
 const SUBDIVISION_NAME = "Palm Lakes Condominiums";
 const SORT_STORAGE_KEY = "plc_sort_mode_v2";
@@ -775,8 +777,13 @@ export default function DirectoryScreen() {
               { transform: [{ translateX: panelTranslate }] },
             ]}
           >
-            {/* Close row */}
+            {/* Compact menu header: recognizable app mark + close control */}
             <View style={styles.menuCloseRow}>
+              <Image
+                source={APP_ICON}
+                style={styles.menuAppIcon}
+                accessibilityLabel="Palm Lakes app icon"
+              />
               <Pressable onPress={closeMenu} style={styles.menuClose} hitSlop={12}>
                 <Icon name="x" size={22} color={theme.textMuted} />
               </Pressable>
@@ -784,7 +791,11 @@ export default function DirectoryScreen() {
 
             <ScrollView
               style={styles.menuScroll}
-              contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+              contentContainerStyle={{ paddingBottom: insets.bottom + 64 }}
+              contentInsetAdjustmentBehavior="never"
+              bounces={false}
+              alwaysBounceVertical={false}
+              overScrollMode="never"
               showsVerticalScrollIndicator={Platform.OS === "web"}
               keyboardShouldPersistTaps="handled"
             >
@@ -1067,15 +1078,24 @@ const styles = StyleSheet.create({
         overflowY: "auto",
         overflowX: "hidden",
         scrollbarWidth: "auto",
+        overscrollBehaviorY: "none",
+        overscrollBehaviorX: "none",
+        touchAction: "pan-y",
       } as any,
       default: {},
     }),
   },
   menuCloseRow: {
     flexDirection: "row",
-    justifyContent: "flex-end",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingBottom: 8,
+  },
+  menuAppIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
   },
   menuClose: {
     padding: 6,
