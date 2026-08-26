@@ -1,6 +1,6 @@
 import Icon from "./Icon";
 import React from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
+import { Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
 import Colors from "@/constants/colors";
 import type { SyncInfo } from "@/hooks/useApi";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
@@ -61,28 +61,25 @@ export default function SyncStatus({ syncInfo, isSyncing, onSync }: Props) {
             {count > 0 ? `${count} units` : "No data loaded"}
           </Text>
           <Text style={[styles.syncText, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
-            Updated {lastSyncText}
+            Data updated {lastSyncText}
           </Text>
         </View>
       </View>
 
-      <Pressable
-        onPress={syncDisabled ? undefined : onSync}
-        disabled={syncDisabled}
-        style={({ pressed }) => [
-          styles.syncBtn,
-          { backgroundColor: theme.tint + (pressed && !syncDisabled ? "CC" : "FF"), opacity: syncDisabled ? 0.4 : 1 },
-        ]}
-      >
-        {isSyncing ? (
-          <ActivityIndicator size="small" color="#fff" />
-        ) : (
+      {!syncDisabled && (
+        <Pressable
+          onPress={onSync}
+          style={({ pressed }) => [
+            styles.syncBtn,
+            { backgroundColor: theme.tint + (pressed ? "CC" : "FF") },
+          ]}
+        >
           <Icon name="refresh-cw" size={14} color="#fff" />
-        )}
-        <Text style={[styles.syncBtnText, { fontFamily: "Inter_600SemiBold" }]}>
-          {isSyncing ? "Syncing..." : "Sync Now"}
-        </Text>
-      </Pressable>
+          <Text style={[styles.syncBtnText, { fontFamily: "Inter_600SemiBold" }]}>
+            Sync Now
+          </Text>
+        </Pressable>
+      )}
     </View>
   );
 }
