@@ -315,7 +315,7 @@ export default function DirectoryScreen() {
   }, [closeMenu]);
 
   const openPropertyAppraiser = useCallback(() => {
-    Linking.openURL("https://www.manteepao.gov").catch(() => {
+    Linking.openURL("https://www.manateepao.gov").catch(() => {
       notify("Unable to Open Website", "Please try again.");
     });
   }, []);
