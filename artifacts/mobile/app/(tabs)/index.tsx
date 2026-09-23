@@ -10,6 +10,7 @@ import {
   Image,
   ImageBackground,
   Keyboard,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -278,6 +279,7 @@ export default function DirectoryScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [sortMode, setSortMode] = useState<SortMode>("street1");
   const [menuVisible, setMenuVisible] = useState(false);
+  const [aboutVisible, setAboutVisible] = useState(false);
 
 
   const menuAnim = useRef(new Animated.Value(0)).current;
@@ -306,6 +308,17 @@ export default function DirectoryScreen() {
       useNativeDriver: Platform.OS !== "web",
     }).start(() => setMenuVisible(false));
   }, [menuAnim]);
+
+  const openAbout = useCallback(() => {
+    closeMenu();
+    setAboutVisible(true);
+  }, [closeMenu]);
+
+  const openPropertyAppraiser = useCallback(() => {
+    Linking.openURL("https://www.manteepao.gov").catch(() => {
+      notify("Unable to Open Website", "Please try again.");
+    });
+  }, []);
 
   const changeSortMode = useCallback((mode: SortMode) => {
     setSortMode(mode);
@@ -926,17 +939,114 @@ export default function DirectoryScreen() {
               <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
                 Steven Low  ·  © 2026
               </Text>
-              <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
-                • Public data sourced from Manatee County GIS
+              <Text
+                numberOfLines={2}
+                style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}
+              >
+                Data Source: Publicly available property records sourced directly from the Manatee County GIS database.
               </Text>
-              <Text style={[styles.menuAboutLine, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
-                • Your notes are saved locally, never shared.
-              </Text>
+              <Pressable
+                onPress={openAbout}
+                style={({ pressed }) => [
+                  styles.aboutReadMore,
+                  { backgroundColor: pressed ? theme.backgroundTertiary : "transparent" },
+                ]}
+              >
+                <Text style={[styles.aboutReadMoreText, { color: theme.tint, fontFamily: "Inter_600SemiBold" }]}>
+                  Read more about this app
+                </Text>
+                <Icon name="chevron-right" size={16} color={theme.tint} />
+              </Pressable>
             </View>
             </ScrollView>
           </Animated.View>
         </View>
       )}
+
+      <Modal
+        visible={aboutVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setAboutVisible(false)}
+      >
+        <View style={styles.aboutModalRoot}>
+          <Pressable
+            style={[StyleSheet.absoluteFillObject, styles.aboutModalBackdrop]}
+            onPress={() => setAboutVisible(false)}
+          />
+          <View
+            style={[
+              styles.aboutModalCard,
+              {
+                backgroundColor: theme.backgroundSecondary,
+                borderColor: theme.separator,
+              },
+            ]}
+          >
+            <View style={styles.aboutModalHeader}>
+              <Text style={[styles.aboutModalTitle, { color: theme.text, fontFamily: "Inter_700Bold" }]}>
+                About
+              </Text>
+              <Pressable
+                onPress={() => setAboutVisible(false)}
+                style={styles.aboutModalClose}
+                hitSlop={12}
+                accessibilityLabel="Close About"
+              >
+                <Icon name="x" size={22} color={theme.textMuted} />
+              </Pressable>
+            </View>
+
+            <ScrollView
+              style={styles.aboutModalScroll}
+              contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+              showsVerticalScrollIndicator={Platform.OS === "web"}
+              bounces={false}
+              alwaysBounceVertical={false}
+            >
+              <Text style={[styles.aboutModalAuthor, { color: theme.text, fontFamily: "Inter_600SemiBold" }]}>
+                Steven Low  ·  © 2026
+              </Text>
+
+              <View style={styles.aboutModalSection}>
+                <Text style={[styles.aboutModalBody, { color: theme.text, fontFamily: "Inter_400Regular" }]}>
+                  <Text style={{ fontFamily: "Inter_700Bold" }}>Data Source:</Text>{" "}
+                  Publicly available property records sourced directly from the Manatee County GIS database.
+                </Text>
+              </View>
+
+              <View style={styles.aboutModalSection}>
+                <Text style={[styles.aboutModalBody, { color: theme.text, fontFamily: "Inter_400Regular" }]}>
+                  <Text style={{ fontFamily: "Inter_700Bold" }}>Purpose:</Text>{" "}
+                  Created as a convenient local directory tool for residents. This app does not collect, host, or generate private personal data.
+                </Text>
+              </View>
+
+              <View style={styles.aboutModalSection}>
+                <Text style={[styles.aboutModalBody, { color: theme.text, fontFamily: "Inter_400Regular" }]}>
+                  <Text style={{ fontFamily: "Inter_700Bold" }}>Opt-Out & Record Management:</Text>{" "}
+                  Because this app strictly mirrors official county records, data updates or privacy protections must be managed through the county. To inquire about public record exemptions, you can visit the{" "}
+                  <Text
+                    onPress={openPropertyAppraiser}
+                    accessibilityRole="link"
+                    style={[styles.aboutLink, { color: theme.tint, fontFamily: "Inter_600SemiBold" }]}
+                  >
+                    Manatee County Property Appraiser website
+                  </Text>
+                  .
+                </Text>
+              </View>
+
+              <View style={styles.aboutModalSection}>
+                <Text style={[styles.aboutModalBody, { color: theme.text, fontFamily: "Inter_400Regular" }]}>
+                  <Text style={{ fontFamily: "Inter_700Bold" }}>Your Notes:</Text>{" "}
+                  Your personal notes are saved locally on your device and are never shared.
+                </Text>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
       <OfflineBanner scrolled={bannerScrolled} />
     </View>
@@ -1156,5 +1266,79 @@ const styles = StyleSheet.create({
   menuAboutLine: {
     fontSize: 13,
     lineHeight: 19,
+  },
+  aboutReadMore: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    marginTop: 4,
+    marginLeft: -8,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 7,
+  },
+  aboutReadMoreText: {
+    fontSize: 13,
+  },
+  aboutModalRoot: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  aboutModalBackdrop: {
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  aboutModalCard: {
+    width: "100%",
+    maxWidth: 540,
+    maxHeight: "88%",
+    borderWidth: 1,
+    borderRadius: 18,
+    overflow: "hidden",
+    ...Platform.select({
+      web: { boxShadow: "0 8px 30px rgba(0,0,0,0.22)" } as any,
+      default: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.22,
+        shadowRadius: 18,
+        elevation: 16,
+      },
+    }),
+  },
+  aboutModalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 12,
+  },
+  aboutModalTitle: {
+    fontSize: 21,
+  },
+  aboutModalClose: {
+    padding: 6,
+  },
+  aboutModalScroll: {
+    flexShrink: 1,
+  },
+  aboutModalAuthor: {
+    paddingHorizontal: 20,
+    paddingBottom: 4,
+    fontSize: 14,
+  },
+  aboutModalSection: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+  },
+  aboutModalBody: {
+    fontSize: 14,
+    lineHeight: 21,
+  },
+  aboutLink: {
+    textDecorationLine: "underline",
   },
 });
