@@ -24,6 +24,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Print from "expo-print";
+import * as WebBrowser from "expo-web-browser";
 import { jsPDF } from "jspdf";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -280,6 +281,8 @@ export default function DirectoryScreen() {
   const [sortMode, setSortMode] = useState<SortMode>("street1");
   const [menuVisible, setMenuVisible] = useState(false);
   const [aboutVisible, setAboutVisible] = useState(false);
+  const [instructionsVisible, setInstructionsVisible] = useState(false);
+  const [instructionsUrl, setInstructionsUrl] = useState<string | null>(null);
 
 
   const menuAnim = useRef(new Animated.Value(0)).current;
@@ -570,15 +573,25 @@ export default function DirectoryScreen() {
   }, [allProperties, allNotes]);
 
   const handleOpenInstructions = useCallback(() => {
-    const instructionsUrl =
-      Platform.OS === "web" && typeof window !== "undefined"
-        ? new URL("/Instructions.pdf", window.location.origin).toString()
-        : "https://plcdirectory.netlify.app/Instructions.pdf";
+    if (Platform.OS === "web") {
+      if (typeof window === "undefined") {
+        notify("Unable to Open Instructions", "Please try again.");
+        return;
+      }
+      setInstructionsUrl(new URL("/Instructions.pdf", window.location.origin).toString());
+      setInstructionsVisible(true);
+      return;
+    }
 
-    Linking.openURL(instructionsUrl).catch(() => {
+    WebBrowser.openBrowserAsync("https://plcdirectory.netlify.app/Instructions.pdf", {
+      dismissButtonStyle: "close",
+      controlsColor: theme.tint,
+      toolbarColor: theme.backgroundSecondary,
+      showTitle: true,
+    }).catch(() => {
       notify("Unable to Open Instructions", "Please try again.");
     });
-  }, []);
+  }, [theme.backgroundSecondary, theme.tint]);
 
   const handleSync = useCallback(async () => {
     try {
@@ -964,6 +977,46 @@ export default function DirectoryScreen() {
       )}
 
       <Modal
+        visible={instructionsVisible}
+        animationType="slide"
+        onRequestClose={() => setInstructionsVisible(false)}
+      >
+        <View style={[styles.instructionsViewer, { backgroundColor: theme.background }]}>
+          <View
+            style={[
+              styles.instructionsHeader,
+              {
+                paddingTop: insets.top + 8,
+                borderBottomColor: theme.separator,
+                backgroundColor: theme.backgroundSecondary,
+              },
+            ]}
+          >
+            <Text style={[styles.instructionsTitle, { color: theme.text, fontFamily: "Inter_700Bold" }]}>
+              Instructions
+            </Text>
+            <Pressable
+              onPress={() => setInstructionsVisible(false)}
+              style={styles.instructionsClose}
+              hitSlop={12}
+              accessibilityLabel="Close Instructions and return to the directory"
+            >
+              <Icon name="x" size={22} color={theme.textMuted} />
+            </Pressable>
+          </View>
+          <View style={styles.instructionsFrame}>
+            {Platform.OS === "web" && instructionsUrl
+              ? React.createElement("iframe", {
+                  src: instructionsUrl,
+                  title: "Palm Lakes Owner Directory Instructions",
+                  style: { width: "100%", height: "100%", border: 0 },
+                })
+              : null}
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
         visible={aboutVisible}
         animationType="slide"
         transparent
@@ -1266,6 +1319,27 @@ const styles = StyleSheet.create({
   menuAboutLine: {
     fontSize: 13,
     lineHeight: 19,
+  },
+  instructionsViewer: {
+    flex: 1,
+  },
+  instructionsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 18,
+    paddingBottom: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  instructionsTitle: {
+    fontSize: 18,
+  },
+  instructionsClose: {
+    padding: 6,
+  },
+  instructionsFrame: {
+    flex: 1,
+    minHeight: 0,
   },
   aboutReadMore: {
     alignSelf: "flex-start",
