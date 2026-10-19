@@ -2,3 +2,4 @@
 - [Expo-print web bug + scrollable overlays](expo-print-web-scrollable-overlays.md) — expo-print's `Print.printAsync({html})` ignores `html` on web; fixed-height RN overlay panels need an internal ScrollView or new content pushes earlier sections out of reach.
 - [iOS PWA keyboard page-pan fix](ios-pwa-keyboard-page-pan.md) — pin `<body>` with `position:fixed;inset:0` or iOS scrolls/pans the whole page on input focus and doesn't fully reverse, leaving it overlapping the status bar/Dynamic Island.
 - [iOS PWA drawer overscroll](ios-pwa-drawer-overscroll.md) — suppress drawer bounce and add bottom clearance so footer/About lines stay visible after releasing at the end.
+- [iOS PWA multi-page PDF viewing](ios-pwa-multipage-pdf.md) — render PDF pages separately in a scrollable in-app view when iPhone's embedded PDF viewer hides later pages.

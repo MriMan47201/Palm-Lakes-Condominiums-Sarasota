@@ -24,7 +24,6 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Print from "expo-print";
-import * as WebBrowser from "expo-web-browser";
 import { jsPDF } from "jspdf";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -51,6 +50,18 @@ const notify = (title: string, message?: string) => {
 
 const ENTRANCE_IMAGE = require("../../assets/images/main-entrance.jpg");
 const APP_ICON = require("../../assets/images/icon.png");
+const INSTRUCTIONS_PAGES = [
+  {
+    source: require("../../assets/images/instructions-page-1.jpg"),
+    label: "Front side · Page 1 of 2",
+    accessibilityLabel: "Instructions front side, page 1 of 2",
+  },
+  {
+    source: require("../../assets/images/instructions-page-2.jpg"),
+    label: "Back side · screen captures · Page 2 of 2",
+    accessibilityLabel: "Instructions back side with screen captures, page 2 of 2",
+  },
+];
 
 const SUBDIVISION_NAME = "Palm Lakes Condominiums";
 const SORT_STORAGE_KEY = "plc_sort_mode_v2";
@@ -282,7 +293,6 @@ export default function DirectoryScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [aboutVisible, setAboutVisible] = useState(false);
   const [instructionsVisible, setInstructionsVisible] = useState(false);
-  const [instructionsUrl, setInstructionsUrl] = useState<string | null>(null);
 
 
   const menuAnim = useRef(new Animated.Value(0)).current;
@@ -573,25 +583,8 @@ export default function DirectoryScreen() {
   }, [allProperties, allNotes]);
 
   const handleOpenInstructions = useCallback(() => {
-    if (Platform.OS === "web") {
-      if (typeof window === "undefined") {
-        notify("Unable to Open Instructions", "Please try again.");
-        return;
-      }
-      setInstructionsUrl(new URL("/Instructions.pdf", window.location.origin).toString());
-      setInstructionsVisible(true);
-      return;
-    }
-
-    WebBrowser.openBrowserAsync("https://plcdirectory.netlify.app/Instructions.pdf", {
-      dismissButtonStyle: "close",
-      controlsColor: theme.tint,
-      toolbarColor: theme.backgroundSecondary,
-      showTitle: true,
-    }).catch(() => {
-      notify("Unable to Open Instructions", "Please try again.");
-    });
-  }, [theme.backgroundSecondary, theme.tint]);
+    setInstructionsVisible(true);
+  }, []);
 
   const handleSync = useCallback(async () => {
     try {
@@ -1007,15 +1000,31 @@ export default function DirectoryScreen() {
               <Icon name="x" size={22} color={theme.textMuted} />
             </Pressable>
           </View>
-          <View style={styles.instructionsFrame}>
-            {Platform.OS === "web" && instructionsUrl
-              ? React.createElement("iframe", {
-                  src: instructionsUrl,
-                  title: "Palm Lakes Owner Directory Instructions",
-                  style: { width: "100%", height: "100%", border: 0 },
-                })
-              : null}
-          </View>
+          <ScrollView
+            style={styles.instructionsFrame}
+            contentContainerStyle={[
+              styles.instructionsPages,
+              { paddingBottom: insets.bottom + 24 },
+            ]}
+            showsVerticalScrollIndicator={Platform.OS === "web"}
+            bounces={false}
+            alwaysBounceVertical={false}
+            overScrollMode="never"
+          >
+            {INSTRUCTIONS_PAGES.map((page) => (
+              <View key={page.label} style={styles.instructionsPage}>
+                <Text style={[styles.instructionsPageLabel, { color: theme.textMuted, fontFamily: "Inter_600SemiBold" }]}>
+                  {page.label}
+                </Text>
+                <Image
+                  source={page.source}
+                  style={styles.instructionsPageImage}
+                  resizeMode="contain"
+                  accessibilityLabel={page.accessibilityLabel}
+                />
+              </View>
+            ))}
+          </ScrollView>
         </View>
       </Modal>
 
@@ -1349,6 +1358,28 @@ const styles = StyleSheet.create({
   instructionsFrame: {
     flex: 1,
     minHeight: 0,
+  },
+  instructionsPages: {
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingTop: 14,
+  },
+  instructionsPage: {
+    width: "100%",
+    maxWidth: 760,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  instructionsPageLabel: {
+    alignSelf: "flex-start",
+    marginBottom: 8,
+    fontSize: 13,
+  },
+  instructionsPageImage: {
+    width: "100%",
+    aspectRatio: 612 / 792,
+    maxWidth: 760,
+    backgroundColor: "#fff",
   },
   aboutReadMore: {
     alignSelf: "flex-start",
