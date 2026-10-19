@@ -1016,12 +1016,14 @@ export default function DirectoryScreen() {
                 <Text style={[styles.instructionsPageLabel, { color: theme.textMuted, fontFamily: "Inter_600SemiBold" }]}>
                   {page.label}
                 </Text>
-                <Image
-                  source={page.source}
-                  style={styles.instructionsPageImage}
-                  resizeMode="contain"
-                  accessibilityLabel={page.accessibilityLabel}
-                />
+                <View style={styles.instructionsPageImageFrame}>
+                  <Image
+                    source={page.source}
+                    style={styles.instructionsPageImage}
+                    resizeMode="contain"
+                    accessibilityLabel={page.accessibilityLabel}
+                  />
+                </View>
               </View>
             ))}
           </ScrollView>
@@ -1375,10 +1377,15 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontSize: 13,
   },
-  instructionsPageImage: {
+  instructionsPageImageFrame: {
     width: "100%",
     aspectRatio: 612 / 792,
     maxWidth: 760,
+    backgroundColor: "#fff",
+  },
+  instructionsPageImage: {
+    width: "100%",
+    height: "100%",
     backgroundColor: "#fff",
   },
   aboutReadMore: {
