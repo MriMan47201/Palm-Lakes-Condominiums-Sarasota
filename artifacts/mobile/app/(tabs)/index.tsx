@@ -55,11 +55,13 @@ const INSTRUCTIONS_PAGES = [
     source: require("../../assets/images/instructions-page-1.jpg"),
     label: "Front side · Page 1 of 2",
     accessibilityLabel: "Instructions front side, page 1 of 2",
+    aspectRatio: 486.8 / 642.2,
   },
   {
     source: require("../../assets/images/instructions-page-2.jpg"),
     label: "Back side · screen captures · Page 2 of 2",
     accessibilityLabel: "Instructions back side with screen captures, page 2 of 2",
+    aspectRatio: 431.1 / 661.8,
   },
 ];
 
@@ -1016,7 +1018,12 @@ export default function DirectoryScreen() {
                 <Text style={[styles.instructionsPageLabel, { color: theme.textMuted, fontFamily: "Inter_600SemiBold" }]}>
                   {page.label}
                 </Text>
-                <View style={styles.instructionsPageImageFrame}>
+                <View
+                  style={[
+                    styles.instructionsPageImageFrame,
+                    { aspectRatio: page.aspectRatio },
+                  ]}
+                >
                   <Image
                     source={page.source}
                     style={styles.instructionsPageImage}
@@ -1379,7 +1386,6 @@ const styles = StyleSheet.create({
   },
   instructionsPageImageFrame: {
     width: "100%",
-    aspectRatio: 612 / 792,
     maxWidth: 760,
     backgroundColor: "#fff",
   },
