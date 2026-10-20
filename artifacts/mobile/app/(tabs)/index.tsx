@@ -877,7 +877,7 @@ export default function DirectoryScreen() {
             <Text style={[styles.menuSectionLabel, { color: theme.tint, fontFamily: "Inter_700Bold" }]}>
               Notes
             </Text>
-            <Text style={[styles.menuNotesWarning, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
+            <Text style={[styles.menuNotesWarning, { color: theme.text, fontFamily: "Inter_400Regular" }]}>
               • Removing this app from your device will also remove your saved notes.
             </Text>
 
