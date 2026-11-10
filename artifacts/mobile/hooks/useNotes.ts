@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState, useEffect, useCallback } from "react";
-import { NOTES_PREFIX } from "@/lib/notesBackup";
+import { MAX_NOTE_LENGTH, NOTES_PREFIX } from "@/lib/notesBackup";
 
 export function useNote(key: string, legacyKey?: string) {
   const storageKey = NOTES_PREFIX + key;
@@ -33,7 +33,7 @@ export function useNote(key: string, legacyKey?: string) {
 
   const saveNote = useCallback(
     async (text: string) => {
-      const trimmed = text.slice(0, 288);
+      const trimmed = text.slice(0, MAX_NOTE_LENGTH);
       await AsyncStorage.setItem(storageKey, trimmed);
       setNote(trimmed);
     },

@@ -37,7 +37,8 @@ import PropertyDetailSheet from "@/components/PropertyDetailSheet";
 import { useProperties, useSyncInfo, useSyncProperties, type Property } from "@/hooks/useApi";
 import { useAllNotes } from "@/hooks/useNotes";
 import {
-  importNotesKeepingExisting,
+  importNotesAppendingExisting,
+  MAX_NOTE_LENGTH,
   MAX_NOTES_BACKUP_BYTES,
   NotesBackupFormatError,
   parseNotesBackup,
@@ -734,28 +735,32 @@ export default function DirectoryScreen() {
       }
 
       const preview = await previewNotesImport(incoming);
-      if (preview.added === 0) {
-        if (preview.conflicts > 0) {
-          notify(
-            "No Notes Added",
-            `${preview.conflicts} conflicting note${preview.conflicts === 1 ? " was" : "s were"} kept on this device.`
-          );
-        } else {
-          notify(
-            "Notes Already Up to Date",
-            "All notes in this file already match this device."
-          );
-        }
+      if (preview.added === 0 && preview.appended === 0) {
+        const details = [
+          preview.tooLong > 0
+            ? `${preview.tooLong} existing note${preview.tooLong === 1 ? " was" : "s were"} left unchanged because appending would exceed ${MAX_NOTE_LENGTH.toLocaleString()} characters.`
+            : "",
+          preview.unchanged > 0
+            ? "The remaining imported notes are already present."
+            : "",
+        ].filter(Boolean);
+        notify(
+          preview.tooLong > 0 ? "No Notes Appended" : "Notes Already Up to Date",
+          details.join("\n") || "No changes were needed."
+        );
         return;
       }
 
       const previewLines = [
         `${preview.added} new note${preview.added === 1 ? "" : "s"} will be added.`,
-        preview.conflicts > 0
-          ? `${preview.conflicts} conflicting note${preview.conflicts === 1 ? " will" : "s will"} keep the version already on this device.`
+        preview.appended > 0
+          ? `${preview.appended} existing note${preview.appended === 1 ? " will" : "s will"} have the imported text appended.`
+          : "",
+        preview.tooLong > 0
+          ? `${preview.tooLong} note${preview.tooLong === 1 ? " will" : "s will"} stay unchanged because appending would exceed ${MAX_NOTE_LENGTH.toLocaleString()} characters.`
           : "",
         preview.unchanged > 0
-          ? `${preview.unchanged} note${preview.unchanged === 1 ? " already matches." : "s already match."}`
+          ? `${preview.unchanged} note${preview.unchanged === 1 ? " already includes this text." : "s already include this text."}`
           : "",
       ].filter(Boolean);
       const shouldImport = await confirmAction(
@@ -765,15 +770,18 @@ export default function DirectoryScreen() {
       );
       if (!shouldImport) return;
 
-      const result = await importNotesKeepingExisting(incoming);
+      const result = await importNotesAppendingExisting(incoming);
       await reloadNotes();
       const resultLines = [
-        `${result.added} note${result.added === 1 ? "" : "s"} added.`,
-        result.conflicts > 0
-          ? `${result.conflicts} conflicting note${result.conflicts === 1 ? " was" : "s were"} kept from this device.`
+        `${result.added} new note${result.added === 1 ? "" : "s"} added.`,
+        result.appended > 0
+          ? `${result.appended} existing note${result.appended === 1 ? " was" : "s were"} updated with appended text.`
+          : "",
+        result.tooLong > 0
+          ? `${result.tooLong} note${result.tooLong === 1 ? " was" : "s were"} left unchanged because appending would exceed ${MAX_NOTE_LENGTH.toLocaleString()} characters.`
           : "",
         result.unchanged > 0
-          ? `${result.unchanged} note${result.unchanged === 1 ? " already matched." : "s already matched."}`
+          ? `${result.unchanged} note${result.unchanged === 1 ? " already included this text." : "s already included this text."}`
           : "",
       ].filter(Boolean);
       notify("Import Complete", resultLines.join("\n"));

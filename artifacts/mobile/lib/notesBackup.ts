@@ -4,10 +4,11 @@ export const NOTES_PREFIX = "plc_note_";
 export const NOTES_BACKUP_FORMAT = "palm-lakes-owner-notes";
 export const NOTES_BACKUP_VERSION = 1;
 export const MAX_NOTES_BACKUP_BYTES = 2_000_000;
+export const MAX_NOTE_LENGTH = 2_048;
 
 const MAX_BACKUP_ENTRIES = 1_000;
 const MAX_ADDRESS_LENGTH = 256;
-const MAX_NOTE_LENGTH = 288;
+const NOTE_BLOCK_SEPARATOR = "\n\n";
 
 export type SavedNote = {
   address: string;
@@ -16,8 +17,9 @@ export type SavedNote = {
 
 export type NotesImportSummary = {
   added: number;
-  conflicts: number;
+  appended: number;
   unchanged: number;
+  tooLong: number;
 };
 
 export class NotesBackupFormatError extends Error {
@@ -128,22 +130,53 @@ export function parseNotesBackup(contents: string): SavedNote[] {
   });
 }
 
-function summarizeImport(
+function analyzeImport(
   current: Map<string, string>,
   incoming: SavedNote[]
-): NotesImportSummary {
-  const summary: NotesImportSummary = { added: 0, conflicts: 0, unchanged: 0 };
+): { summary: NotesImportSummary; writes: [string, string][] } {
+  const summary: NotesImportSummary = {
+    added: 0,
+    appended: 0,
+    unchanged: 0,
+    tooLong: 0,
+  };
+  const writes: [string, string][] = [];
+
   for (const entry of incoming) {
     const existing = current.get(entry.address);
     if (existing === undefined) {
       summary.added += 1;
-    } else if (existing === entry.note) {
-      summary.unchanged += 1;
-    } else {
-      summary.conflicts += 1;
+      writes.push([NOTES_PREFIX + entry.address, entry.note]);
+      continue;
     }
+
+    const existingBlocks = existing
+      .split(NOTE_BLOCK_SEPARATOR)
+      .filter((block) => block.trim().length > 0);
+    const existingBlockSet = new Set(existingBlocks);
+    const newBlocks = entry.note
+      .split(NOTE_BLOCK_SEPARATOR)
+      .filter((block) => block.trim().length > 0 && !existingBlockSet.has(block));
+
+    if (newBlocks.length === 0) {
+      summary.unchanged += 1;
+      continue;
+    }
+
+    const separator = existing.endsWith(NOTE_BLOCK_SEPARATOR)
+      ? ""
+      : NOTE_BLOCK_SEPARATOR;
+    const merged = `${existing}${separator}${newBlocks.join(NOTE_BLOCK_SEPARATOR)}`;
+    if (merged.length > MAX_NOTE_LENGTH) {
+      summary.tooLong += 1;
+      continue;
+    }
+
+    summary.appended += 1;
+    writes.push([NOTES_PREFIX + entry.address, merged]);
   }
-  return summary;
+
+  return { summary, writes };
 }
 
 async function readSavedNoteMap(): Promise<Map<string, string>> {
@@ -153,20 +186,14 @@ async function readSavedNoteMap(): Promise<Map<string, string>> {
 export async function previewNotesImport(
   incoming: SavedNote[]
 ): Promise<NotesImportSummary> {
-  return summarizeImport(await readSavedNoteMap(), incoming);
+  return analyzeImport(await readSavedNoteMap(), incoming).summary;
 }
 
-export async function importNotesKeepingExisting(
+export async function importNotesAppendingExisting(
   incoming: SavedNote[]
 ): Promise<NotesImportSummary> {
   const current = await readSavedNoteMap();
-  const summary = summarizeImport(current, incoming);
-  const writes: [string, string][] = [];
-
-  for (const entry of incoming) {
-    if (current.has(entry.address)) continue;
-    writes.push([NOTES_PREFIX + entry.address, entry.note]);
-  }
+  const { summary, writes } = analyzeImport(current, incoming);
 
   if (writes.length > 0) {
     await AsyncStorage.multiSet(writes);

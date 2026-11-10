@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import type { Property } from "@/hooks/useApi";
 import { useNote } from "@/hooks/useNotes";
+import { MAX_NOTE_LENGTH } from "@/lib/notesBackup";
 
 type Props = {
   property: Property | null;
@@ -92,7 +93,7 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
   }, [editing, note]);
 
   const handleChange = (text: string) => {
-    setDraft(text.slice(0, 288));
+    setDraft(text.slice(0, MAX_NOTE_LENGTH));
     setDirty(true);
   };
 
@@ -175,7 +176,7 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
                 Notes
               </Text>
               <Text style={[styles.noteModalCount, { color: theme.textMuted, fontFamily: "Inter_400Regular" }]}>
-                {draft.length}/288
+                {draft.length}/{MAX_NOTE_LENGTH}
               </Text>
             </View>
 
@@ -196,7 +197,7 @@ function NotesSection({ propertyId, legacyKey, theme, isDark }: { propertyId: st
               onChangeText={handleChange}
               onBlur={resetZoom}
               multiline
-              maxLength={288}
+              maxLength={MAX_NOTE_LENGTH}
               placeholder="Write your note here…"
               placeholderTextColor={theme.textMuted}
               autoFocus
