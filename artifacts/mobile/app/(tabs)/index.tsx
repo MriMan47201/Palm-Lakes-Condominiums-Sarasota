@@ -637,7 +637,7 @@ export default function DirectoryScreen() {
           });
           const browserNavigator = navigator as Navigator & {
             canShare?: (data: { files: File[] }) => boolean;
-            share?: (data: { files: File[]; title?: string }) => Promise<void>;
+            share?: (data: { files: File[] }) => Promise<void>;
           };
 
           if (
@@ -647,7 +647,6 @@ export default function DirectoryScreen() {
             try {
               await browserNavigator.share({
                 files: [file],
-                title: "Palm Lakes saved notes",
               });
               return;
             } catch (error) {
