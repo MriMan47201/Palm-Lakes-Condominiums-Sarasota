@@ -1,7 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState, useEffect, useCallback } from "react";
-
-const NOTES_PREFIX = "plc_note_";
+import { NOTES_PREFIX } from "@/lib/notesBackup";
 
 export function useNote(key: string, legacyKey?: string) {
   const storageKey = NOTES_PREFIX + key;

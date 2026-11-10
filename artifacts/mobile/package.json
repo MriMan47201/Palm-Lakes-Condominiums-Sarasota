@@ -46,7 +46,10 @@
     "zod-validation-error": "^3.4.0"
   },
   "dependencies": {
+    "expo-document-picker": "~14.0.8",
+    "expo-file-system": "~19.0.24",
     "expo-print": "~15.0.8",
+    "expo-sharing": "~14.0.8",
     "jspdf": "^4.2.1"
   }
 }

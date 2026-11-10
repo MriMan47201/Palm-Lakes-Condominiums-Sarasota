@@ -97,7 +97,7 @@ export default function OfflineBanner({ scrolled = false }: Props) {
         <Icon name="wifi-off" size={15} color="#FFE880" style={styles.icon} />
         <Text style={styles.text}>
           No connection — directory is available from cached data. Your notes
-          are always kept on this device only and are never uploaded or shared.
+          stay on this device unless you choose to export and share them.
         </Text>
       </View>
     </Animated.View>

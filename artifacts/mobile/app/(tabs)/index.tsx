@@ -23,7 +23,10 @@ import {
   Linking,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system/legacy";
 import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 import { jsPDF } from "jspdf";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -33,6 +36,15 @@ import SyncStatus from "@/components/SyncStatus";
 import PropertyDetailSheet from "@/components/PropertyDetailSheet";
 import { useProperties, useSyncInfo, useSyncProperties, type Property } from "@/hooks/useApi";
 import { useAllNotes } from "@/hooks/useNotes";
+import {
+  importNotesKeepingExisting,
+  MAX_NOTES_BACKUP_BYTES,
+  NotesBackupFormatError,
+  parseNotesBackup,
+  previewNotesImport,
+  readSavedNotes,
+  serializeNotesBackup,
+} from "@/lib/notesBackup";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import OfflineBanner from "@/components/OfflineBanner";
 
@@ -46,6 +58,27 @@ const notify = (title: string, message?: string) => {
   } else {
     Alert.alert(title, message);
   }
+};
+
+const confirmAction = (
+  title: string,
+  message: string,
+  confirmLabel: string
+): Promise<boolean> => {
+  if (Platform.OS === "web") {
+    return Promise.resolve(window.confirm(`${title}\n\n${message}`));
+  }
+  return new Promise((resolve) => {
+    Alert.alert(
+      title,
+      message,
+      [
+        { text: "Cancel", style: "cancel", onPress: () => resolve(false) },
+        { text: confirmLabel, onPress: () => resolve(true) },
+      ],
+      { cancelable: true, onDismiss: () => resolve(false) }
+    );
+  });
 };
 
 const ENTRANCE_IMAGE = require("../../assets/images/main-entrance.jpg");
@@ -584,6 +617,176 @@ export default function DirectoryScreen() {
     }
   }, [allProperties, allNotes]);
 
+  const handleExportNotes = useCallback(async () => {
+    try {
+      const notes = await readSavedNotes();
+      if (notes.length === 0) {
+        notify("No Notes", "You haven't saved any notes yet.");
+        return;
+      }
+
+      const exportedAt = new Date().toISOString();
+      const fileName = `palm-lakes-notes-${exportedAt.slice(0, 10)}.json`;
+      const contents = serializeNotesBackup(notes, exportedAt);
+
+      if (Platform.OS === "web") {
+        if (typeof File !== "undefined" && typeof navigator !== "undefined") {
+          const file = new File([contents], fileName, {
+            type: "application/json",
+          });
+          const browserNavigator = navigator as Navigator & {
+            canShare?: (data: { files: File[] }) => boolean;
+            share?: (data: { files: File[]; title?: string }) => Promise<void>;
+          };
+
+          if (
+            browserNavigator.share &&
+            browserNavigator.canShare?.({ files: [file] })
+          ) {
+            try {
+              await browserNavigator.share({
+                files: [file],
+                title: "Palm Lakes saved notes",
+              });
+              return;
+            } catch (error) {
+              const name =
+                typeof error === "object" && error && "name" in error
+                  ? error.name
+                  : undefined;
+              if (name === "AbortError") return;
+            }
+          }
+        }
+
+        const blob = new Blob([contents], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        notify(
+          "Notes Exported",
+          "The JSON file was downloaded. Attach it to an email or import it on another device."
+        );
+        return;
+      }
+
+      if (!FileSystem.cacheDirectory) {
+        throw new Error("The file storage location is unavailable.");
+      }
+      const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
+      await FileSystem.writeAsStringAsync(fileUri, contents, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+      if (!(await Sharing.isAvailableAsync())) {
+        throw new Error("File sharing is unavailable on this device.");
+      }
+      await Sharing.shareAsync(fileUri, {
+        mimeType: "application/json",
+        UTI: "public.json",
+        dialogTitle: "Share saved notes",
+      });
+    } catch {
+      notify(
+        "Export Failed",
+        "Could not prepare or share the notes file. Please try again."
+      );
+    }
+  }, []);
+
+  const handleImportNotes = useCallback(async () => {
+    try {
+      const selection = await DocumentPicker.getDocumentAsync({
+        type: "application/json",
+        copyToCacheDirectory: true,
+        multiple: false,
+        base64: false,
+      });
+      if (selection.canceled || !selection.assets[0]) return;
+
+      const selectedFile = selection.assets[0];
+      if (
+        selectedFile.size !== undefined &&
+        selectedFile.size > MAX_NOTES_BACKUP_BYTES
+      ) {
+        throw new NotesBackupFormatError(
+          "This notes file is too large to import."
+        );
+      }
+
+      const contents =
+        Platform.OS === "web"
+          ? selectedFile.file
+            ? await selectedFile.file.text()
+            : await (await fetch(selectedFile.uri)).text()
+          : await FileSystem.readAsStringAsync(selectedFile.uri, {
+              encoding: FileSystem.EncodingType.UTF8,
+            });
+      const incoming = parseNotesBackup(contents);
+      if (incoming.length === 0) {
+        notify("No Notes Found", "This backup contains no saved notes.");
+        return;
+      }
+
+      const preview = await previewNotesImport(incoming);
+      if (preview.added === 0) {
+        if (preview.conflicts > 0) {
+          notify(
+            "No Notes Added",
+            `${preview.conflicts} conflicting note${preview.conflicts === 1 ? " was" : "s were"} kept on this device.`
+          );
+        } else {
+          notify(
+            "Notes Already Up to Date",
+            "All notes in this file already match this device."
+          );
+        }
+        return;
+      }
+
+      const previewLines = [
+        `${preview.added} new note${preview.added === 1 ? "" : "s"} will be added.`,
+        preview.conflicts > 0
+          ? `${preview.conflicts} conflicting note${preview.conflicts === 1 ? " will" : "s will"} keep the version already on this device.`
+          : "",
+        preview.unchanged > 0
+          ? `${preview.unchanged} note${preview.unchanged === 1 ? " already matches." : "s already match."}`
+          : "",
+      ].filter(Boolean);
+      const shouldImport = await confirmAction(
+        "Review Notes Import",
+        `${previewLines.join("\n")}\n\nContinue with import?`,
+        "Import"
+      );
+      if (!shouldImport) return;
+
+      const result = await importNotesKeepingExisting(incoming);
+      await reloadNotes();
+      const resultLines = [
+        `${result.added} note${result.added === 1 ? "" : "s"} added.`,
+        result.conflicts > 0
+          ? `${result.conflicts} conflicting note${result.conflicts === 1 ? " was" : "s were"} kept from this device.`
+          : "",
+        result.unchanged > 0
+          ? `${result.unchanged} note${result.unchanged === 1 ? " already matched." : "s already matched."}`
+          : "",
+      ].filter(Boolean);
+      notify("Import Complete", resultLines.join("\n"));
+    } catch (error) {
+      notify(
+        "Import Failed",
+        error instanceof NotesBackupFormatError
+          ? error.message
+          : "Could not read that file. Select a Palm Lakes notes backup and try again."
+      );
+    }
+  }, [reloadNotes]);
+
   const handleOpenInstructions = useCallback(() => {
     setInstructionsVisible(true);
   }, []);
@@ -883,6 +1086,57 @@ export default function DirectoryScreen() {
 
             <View style={styles.menuOptions}>
               <Pressable
+                testID="export-notes-button"
+                accessibilityRole="button"
+                accessibilityLabel="Export saved notes"
+                onPress={() => { closeMenu(); void handleExportNotes(); }}
+                style={({ pressed }) => [
+                  styles.menuOption,
+                  {
+                    backgroundColor: pressed ? theme.backgroundTertiary : "transparent",
+                    borderColor: "transparent",
+                  },
+                ]}
+              >
+                <View style={[styles.menuOptionIcon, { backgroundColor: theme.backgroundTertiary }]}>
+                  <Icon name="download" size={14} color={theme.textMuted} />
+                </View>
+                <View style={styles.menuOptionText}>
+                  <Text style={[
+                    styles.menuOptionLabel,
+                    { color: theme.text, fontFamily: "Inter_600SemiBold" },
+                  ]}>
+                    Export saved notes
+                  </Text>
+                </View>
+              </Pressable>
+              <Pressable
+                testID="import-notes-button"
+                accessibilityRole="button"
+                accessibilityLabel="Import saved notes"
+                onPress={() => { void handleImportNotes(); closeMenu(); }}
+                style={({ pressed }) => [
+                  styles.menuOption,
+                  {
+                    backgroundColor: pressed ? theme.backgroundTertiary : "transparent",
+                    borderColor: "transparent",
+                  },
+                ]}
+              >
+                <View style={[styles.menuOptionIcon, { backgroundColor: theme.backgroundTertiary }]}>
+                  <Icon name="upload" size={14} color={theme.textMuted} />
+                </View>
+                <View style={styles.menuOptionText}>
+                  <Text style={[
+                    styles.menuOptionLabel,
+                    { color: theme.text, fontFamily: "Inter_600SemiBold" },
+                  ]}>
+                    Import saved notes
+                  </Text>
+                </View>
+              </Pressable>
+              <Pressable
+                testID="print-notes-button"
                 onPress={() => { closeMenu(); handlePrintNotes(); }}
                 style={({ pressed }) => [
                   styles.menuOption,
@@ -1114,7 +1368,7 @@ export default function DirectoryScreen() {
               <View style={styles.aboutModalSection}>
                 <Text style={[styles.aboutModalBody, { color: theme.text, fontFamily: "Inter_400Regular" }]}>
                   <Text style={{ fontFamily: "Inter_700Bold" }}>Your Notes:</Text>{" "}
-                  Your personal notes are saved locally on your device and are never shared.
+                  Your personal notes are saved locally and shared only if you choose to export them.
                 </Text>
               </View>
             </ScrollView>

@@ -4,8 +4,9 @@ import type { StyleProp, ViewStyle } from "react-native";
 
 export type IconName =
   | "align-left" | "alert-circle" | "check" | "chevron-right"
-  | "grid" | "hash" | "home" | "info" | "map-pin" | "menu" | "pencil"
-  | "printer" | "refresh-cw" | "search" | "sliders" | "wifi-off" | "x";
+  | "download" | "grid" | "hash" | "home" | "info" | "map-pin" | "menu"
+  | "pencil" | "printer" | "refresh-cw" | "search" | "sliders" | "upload"
+  | "wifi-off" | "x";
 
 type Props = {
   name: IconName;
@@ -124,6 +125,18 @@ function renderPaths(name: IconName, color: string) {
         <Polyline points="6 9 6 2 18 2 18 9" {...p} />
         <Path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" {...p} />
         <Rect x={6} y={14} width={12} height={8} {...p} />
+      </>;
+    case "download":
+      return <>
+        <Path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" {...p} />
+        <Polyline points="7 10 12 15 17 10" {...p} />
+        <Line x1={12} y1={15} x2={12} y2={3} {...p} />
+      </>;
+    case "upload":
+      return <>
+        <Path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" {...p} />
+        <Polyline points="17 8 12 3 7 8" {...p} />
+        <Line x1={12} y1={3} x2={12} y2={15} {...p} />
       </>;
     default:
       return null;
